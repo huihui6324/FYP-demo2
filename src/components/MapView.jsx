@@ -11,12 +11,11 @@ function MapView() {
     // 設置 Cesium Token
     Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwNTZmYzAwNS03MDU3LTQ1MGYtYjJkNC1kMmFjNzUxODU5OWUiLCJpZCI6Mzg4MDk1LCJpYXQiOjE3NzA0NTQ5NTd9.4DzniAg6qD-wNw_E0t75ytmPCkba163P2u_XIIjYNFU'
 
-    // 非同步初始化地圖
-    const initViewer = async () => {
+    // 初始化地圖
+    const initViewer = () => {
       try {
-        // 創建 Cesium Viewer
+        // 創建 Cesium Viewer - 不指定 terrainProvider 讓它使用預設值
         const viewer = new Cesium.Viewer(cesiumContainer.current, {
-          terrainProvider: await Cesium.Ion.createDefaultTerrainProvider(),
           baseLayerPicker: false,
           geocoder: false,
           homeButton: true,
