@@ -1,6 +1,4 @@
 import { useEffect, useRef } from 'react'
-import * as Cesium from 'cesium'
-import 'cesium/Build/Cesium/Widgets/widgets.css'
 import './MapView.css'
 
 function MapView() {
@@ -8,6 +6,14 @@ function MapView() {
   const viewerRef = useRef(null)
 
   useEffect(() => {
+    // 檢查 Cesium 是否加載
+    if (typeof window.Cesium === 'undefined') {
+      console.error('Cesium library not loaded')
+      return
+    }
+
+    const Cesium = window.Cesium
+    
     // 設置 Cesium Token
     Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwNTZmYzAwNS03MDU3LTQ1MGYtYjJkNC1kMmFjNzUxODU5OWUiLCJpZCI6Mzg4MDk1LCJpYXQiOjE3NzA0NTQ5NTd9.4DzniAg6qD-wNw_E0t75ytmPCkba163P2u_XIIjYNFU'
 
