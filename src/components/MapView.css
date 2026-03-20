@@ -305,6 +305,13 @@
   background: #f8f9fa;
   border-radius: 8px;
   text-align: center;
+  transition: all 0.3s;
+}
+
+.monitoring-card:hover {
+  background: #e9ecef;
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
 }
 
 .monitoring-card h4 {
@@ -672,4 +679,39 @@
   .assessment-options {
     grid-template-columns: 1fr;
   }
+}
+
+/* ========== Emoji 图标样式（新增） ========== */
+.emoji-icon {
+  font-size: 32px;
+  display: block;
+  text-align: center;
+  margin-bottom: 10px;
+  line-height: 1;
+  transition: transform 0.2s;
+}
+
+.emoji-icon-small {
+  font-size: 24px;
+  margin-right: 10px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.emoji-icon-large {
+  font-size: 48px;
+}
+
+/* Emoji 悬停效果 */
+.emoji-icon:hover {
+  transform: scale(1.1);
+}
+
+/* 监测卡片中的 emoji */
+.monitoring-card .emoji-icon {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.monitoring-card:hover .emoji-icon {
+  transform: scale(1.2);
 }

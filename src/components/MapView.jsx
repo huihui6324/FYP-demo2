@@ -259,19 +259,19 @@ function MapView() {
               <div className="panel-content">
                 <div className="assessment-options">
                   <button className="assessment-btn">
-                    <span style={{ fontSize: '24px', marginRight: '10px' }}>📈</span>
+                    <span className="emoji-icon emoji-icon-small">📈</span>
                     <span>Influence Analysis</span>
                   </button>
                   <button className="assessment-btn">
-                    <span style={{ fontSize: '24px', marginRight: '10px' }}>💨</span>
+                    <span className="emoji-icon emoji-icon-small">💨</span>
                     <span>Air Ventilation</span>
                   </button>
                   <button className="assessment-btn">
-                    <span style={{ fontSize: '24px', marginRight: '10px' }}>🔇</span>
+                    <span className="emoji-icon emoji-icon-small">🔇</span>
                     <span>Noise Impact Assessment</span>
                   </button>
                   <button className="assessment-btn">
-                    <span style={{ fontSize: '24px', marginRight: '10px' }}>🌬️</span>
+                    <span className="emoji-icon emoji-icon-small">🌬️</span>
                     <span>Air Impact Assessment</span>
                   </button>
                 </div>
@@ -288,19 +288,19 @@ function MapView() {
               <div className="panel-content">
                 <div className="monitoring-types">
                   <div className="monitoring-card">
-                    <div style={{ fontSize: '32px', marginBottom: '10px' }}>📹</div>
+                    <span className="emoji-icon">📹</span>
                     <h4>CCTV Cameras</h4>
                     <p>View live camera feeds</p>
                     <button className="btn-sm">Open Dashboard</button>
                   </div>
                   <div className="monitoring-card">
-                    <div style={{ fontSize: '32px', marginBottom: '10px' }}>🔊</div>
+                    <span className="emoji-icon">🔊</span>
                     <h4>Sound Sensors</h4>
                     <p>Monitor noise levels</p>
                     <button className="btn-sm">Open Dashboard</button>
                   </div>
                   <div className="monitoring-card">
-                    <div style={{ fontSize: '32px', marginBottom: '10px' }}>🦅</div>
+                    <span className="emoji-icon">🦅</span>
                     <h4>Bird Monitoring</h4>
                     <p>Track bird activity</p>
                     <button className="btn-sm">Open Dashboard</button>
