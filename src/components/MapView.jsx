@@ -259,19 +259,19 @@ function MapView() {
               <div className="panel-content">
                 <div className="assessment-options">
                   <button className="assessment-btn">
-                    <img src="/images/influence.png" alt="" width="24" />
+                    <span style={{ fontSize: '24px', marginRight: '10px' }}>📈</span>
                     <span>Influence Analysis</span>
                   </button>
                   <button className="assessment-btn">
-                    <img src="/images/assessmentWizard/windAssesments.png" alt="" width="24" />
+                    <span style={{ fontSize: '24px', marginRight: '10px' }}>💨</span>
                     <span>Air Ventilation</span>
                   </button>
                   <button className="assessment-btn">
-                    <img src="/images/assessmentWizard/noise.png" alt="" width="24" />
+                    <span style={{ fontSize: '24px', marginRight: '10px' }}>🔇</span>
                     <span>Noise Impact Assessment</span>
                   </button>
                   <button className="assessment-btn">
-                    <img src="/images/assessmentWizard/air.png" alt="" width="24" />
+                    <span style={{ fontSize: '24px', marginRight: '10px' }}>🌬️</span>
                     <span>Air Impact Assessment</span>
                   </button>
                 </div>
@@ -288,19 +288,19 @@ function MapView() {
               <div className="panel-content">
                 <div className="monitoring-types">
                   <div className="monitoring-card">
-                    <img src="/images/monitorWizard/camera.png" alt="" width="32" />
+                    <div style={{ fontSize: '32px', marginBottom: '10px' }}>📹</div>
                     <h4>CCTV Cameras</h4>
                     <p>View live camera feeds</p>
                     <button className="btn-sm">Open Dashboard</button>
                   </div>
                   <div className="monitoring-card">
-                    <img src="/images/monitorWizard/sound-sensor.png" alt="" width="32" />
+                    <div style={{ fontSize: '32px', marginBottom: '10px' }}>🔊</div>
                     <h4>Sound Sensors</h4>
                     <p>Monitor noise levels</p>
                     <button className="btn-sm">Open Dashboard</button>
                   </div>
                   <div className="monitoring-card">
-                    <img src="/images/monitorWizard/monitoring-devices.png" alt="" width="32" />
+                    <div style={{ fontSize: '32px', marginBottom: '10px' }}>🦅</div>
                     <h4>Bird Monitoring</h4>
                     <p>Track bird activity</p>
                     <button className="btn-sm">Open Dashboard</button>
