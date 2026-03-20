@@ -1,0 +1,186 @@
+/* src/components/wizards/AssessmentWizard.css */
+.assessment-wizard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sub-panel {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.model-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background: #f8f9fa;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.model-section-header:hover {
+  background: #e9ecef;
+}
+
+.model-section-header small {
+  color: #6c757d;
+  font-weight: normal;
+  font-size: 12px;
+  margin-left: 10px;
+}
+
+.model-section-content {
+  padding: 1rem;
+}
+
+.assessments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.assessments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.assessment-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.assessment-type {
+  flex-grow: 1;
+  font-weight: 600;
+}
+
+.assessment-date {
+  color: #6c757d;
+  min-width: 100px;
+}
+
+.assessment-status {
+  color: #198754;
+  min-width: 80px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.buffer-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.buffer-slider {
+  flex-grow: 1;
+  height: 6px;
+}
+
+.buffer-input {
+  width: 60px;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.buffer-actions {
+  display: flex;
+  gap: 5px;
+  margin: 10px 0;
+}
+
+.coordinates-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.coordinate-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.coordinate-inputs {
+  display: flex;
+  gap: 10px;
+}
+
+.coordinate-inputs input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.btn-primary {
+  background: #0d6efd;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #0b5ed7;
+}
+
+.ms-auto {
+  margin-left: auto !important;
+}
+
+.my-2 {
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.p-3 {
+  padding: 1rem !important;
+}

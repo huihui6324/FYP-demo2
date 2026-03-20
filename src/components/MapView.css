@@ -24,14 +24,21 @@
   align-items: center;
   padding: 0 15px;
   z-index: 1001;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .toolbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-weight: 700;
   font-size: 18px;
   color: #0d6efd;
   margin-right: 15px;
+}
+
+.logo-img {
+  height: 35px;
 }
 
 .toolbar-divider {
@@ -84,267 +91,62 @@
   gap: 6px;
 }
 
-/* ========== 顶部面板 ========== */
-.top-panel {
-  position: absolute;
-  top: 55px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 800px;
-  max-width: 90%;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-  z-index: 1000;
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-.panel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 20px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
-  border-radius: 8px 8px 0 0;
-}
-
-.panel-header h3 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.panel-close {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #6c757d;
-  padding: 0 5px;
-}
-
-.panel-close:hover {
-  color: #dc3545;
-}
-
-.panel-content {
-  padding: 20px;
-}
-
-/* Project Manager */
-.project-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.project-item {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 12px;
-  background: #f8f9fa;
-  border-radius: 6px;
-}
-
-.project-code {
-  font-weight: 600;
-  color: #0d6efd;
-  min-width: 80px;
-}
-
-.project-version {
-  color: #6c757d;
-  min-width: 50px;
-}
-
-.project-name {
-  flex-grow: 1;
-}
-
-.project-stage {
-  color: #198754;
-  min-width: 150px;
-}
-
-.project-actions {
-  display: flex;
-  gap: 5px;
-}
-
-.btn-sm {
-  padding: 5px 10px;
-  font-size: 12px;
-  border: 1px solid #dee2e6;
-  background: white;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn-sm:hover {
-  background: #e9ecef;
-}
-
-.btn-sm.danger {
-  color: #dc3545;
-  border-color: #dc3545;
-}
-
-.btn-sm.danger:hover {
-  background: #dc3545;
-  color: white;
-}
-
-/* Model Manager */
-.upload-section {
-  margin-bottom: 20px;
-}
-
-.upload-section label {
-  font-weight: 600;
-  display: block;
-  margin-bottom: 5px;
-}
-
-.help-text {
-  color: #6c757d;
-  font-size: 13px;
-  margin-bottom: 10px;
-}
-
-.upload-section input[type="file"] {
-  width: 100%;
-  padding: 10px;
-  border: 2px dashed #dee2e6;
-  border-radius: 6px;
-  background: #f8f9fa;
-}
-
-.model-list {
-  padding: 20px;
-  text-align: center;
-  background: #f8f9fa;
-  border-radius: 6px;
-}
-
-.empty-state {
-  color: #6c757d;
-}
-
-/* Layer Manager */
-.search-input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  margin-bottom: 15px;
-}
-
-.layer-groups {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.layer-group h4 {
-  margin: 0 0 10px 0;
-  font-size: 14px;
-  color: #495057;
-}
-
-.layer-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 10px;
-  background: #f8f9fa;
-  border-radius: 4px;
-  margin-bottom: 5px;
-}
-
-.layer-opacity {
-  width: 100px;
-}
-
-/* Assessment Wizard */
-.assessment-options {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
-}
-
-.assessment-btn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 15px;
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.assessment-btn:hover {
-  background: #e9ecef;
-  border-color: #0d6efd;
-}
-
-/* Monitoring Wizard */
-.monitoring-types {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-.monitoring-card {
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  text-align: center;
-  transition: all 0.3s;
-}
-
-.monitoring-card:hover {
-  background: #e9ecef;
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-}
-
-.monitoring-card h4 {
-  margin: 10px 0 5px 0;
-  font-size: 14px;
-}
-
-.monitoring-card p {
-  color: #6c757d;
-  font-size: 13px;
-  margin-bottom: 15px;
-}
-
 /* ========== 左侧侧边栏 ========== */
 .sidebar {
   position: absolute;
   left: 0;
   top: 55px;
   bottom: 0;
-  width: 380px;
-  background: rgba(255,255,255,0.95);
+  width: 400px;
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   overflow-y: auto;
   z-index: 1000;
   padding: 10px;
-  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 默认状态 */
+.no-panel-selected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #6c757d;
+  height: calc(100vh - 55px);
+}
+
+.no-panel-selected h3 {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: #0d6efd;
+}
+
+.no-panel-selected p {
+  font-size: 14px;
+  margin-bottom: 25px;
+}
+
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* ========== 子面板样式 ========== */
 .sub-panel {
   background: white;
   border-radius: 8px;
-  margin-bottom: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
@@ -357,24 +159,30 @@
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
-  text-decoration: none;
-  color: #333;
   transition: background 0.2s;
+  border-bottom: 1px solid #e9ecef;
 }
 
 .model-section-header:hover {
   background: #e9ecef;
 }
 
+.model-section-header small {
+  color: #6c757d;
+  font-weight: normal;
+  font-size: 12px;
+  margin-left: 10px;
+}
+
 .model-section-content {
-  border-top: 1px solid #e9ecef;
+  border-top: none;
 }
 
 .p-3 {
   padding: 1rem !important;
 }
 
-/* 复选框 */
+/* ========== 复选框样式 ========== */
 .checkbox-item {
   display: flex;
   align-items: center;
@@ -384,18 +192,18 @@
   font-size: 14px;
 }
 
+.checkbox-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .checkbox-item input[type="checkbox"] {
   width: 16px;
   height: 16px;
   cursor: pointer;
 }
 
-.checkbox-item.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* 滑块 */
+/* ========== 滑块样式 ========== */
 .form-range {
   width: 100%;
   height: 6px;
@@ -413,7 +221,7 @@
   background: #0d6efd;
   cursor: pointer;
   border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .slider-item {
@@ -431,7 +239,7 @@
   margin-top: 5px;
 }
 
-/* 表单 */
+/* ========== 表单样式 ========== */
 .form-group {
   margin-bottom: 15px;
 }
@@ -444,7 +252,8 @@
   color: #495057;
 }
 
-.form-select {
+.form-select,
+.form-control {
   width: 100%;
   padding: 8px 12px;
   border: 1px solid #ced4da;
@@ -471,7 +280,7 @@
   height: 20px;
 }
 
-/* 时间显示 */
+/* ========== 时间显示 ========== */
 .time-display {
   margin-top: 15px;
 }
@@ -486,7 +295,7 @@
   color: white;
 }
 
-/* 布局辅助 */
+/* ========== 布局辅助 ========== */
 .row {
   display: flex;
   flex-wrap: wrap;
@@ -511,17 +320,64 @@
   flex-grow: 1 !important;
 }
 
+.flex3 {
+  flex: 3;
+}
+
+.flex2 {
+  flex: 2;
+}
+
 .text-center {
   text-align: center !important;
 }
 
-.mb-1 { margin-bottom: 0.25rem !important; }
-.mb-2 { margin-bottom: 0.5rem !important; }
-.mb-3 { margin-bottom: 1rem !important; }
-.mt-3 { margin-top: 1rem !important; }
-.px-1 { padding-left: 0.25rem !important; padding-right: 0.25rem !important; }
+.mb-2 {
+  margin-bottom: 0.5rem !important;
+}
 
-/* 上传按钮 */
+.mb-3 {
+  margin-bottom: 1rem !important;
+}
+
+.mt-3 {
+  margin-top: 1rem !important;
+}
+
+.my-2 {
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.px-1 {
+  padding-left: 0.25rem !important;
+  padding-right: 0.25rem !important;
+}
+
+/* ========== 按钮样式 ========== */
+.btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.btn-primary {
+  background: #0d6efd;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #0b5ed7;
+}
+
 .btn-upload {
   width: 100%;
   padding: 10px;
@@ -538,7 +394,137 @@
   background: #e9ecef;
 }
 
-/* ECMWF 图层 */
+/* ========== 评估列表 ========== */
+.assessments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.assessments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.assessment-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.assessment-type {
+  flex-grow: 1;
+  font-weight: 600;
+}
+
+.assessment-date {
+  color: #6c757d;
+}
+
+.assessment-status {
+  color: #198754;
+}
+
+/* ========== 缓冲区控制 ========== */
+.buffer-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.buffer-slider {
+  flex-grow: 1;
+  height: 6px;
+}
+
+.buffer-input {
+  width: 60px;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.buffer-actions {
+  display: flex;
+  gap: 5px;
+  margin: 10px 0;
+}
+
+.help-text {
+  font-size: 12px;
+  color: #888;
+  margin: 5px 0;
+}
+
+/* ========== 坐标输入 ========== */
+.coordinates-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.coordinate-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.coordinate-inputs {
+  display: flex;
+  gap: 10px;
+}
+
+.coordinate-inputs input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* ========== 模拟信息 ========== */
+.info-text {
+  color: #6c757d;
+  font-size: 13px;
+  margin-bottom: 15px;
+}
+
+/* ========== 热力图图例 ========== */
+.heatmap-legend {
+  margin: 15px 0;
+}
+
+.hue-gradient {
+  height: 20px;
+  background: linear-gradient(to right,
+    #00008b, #0000cd, #0000ff, #00ffff, #00ff00, #ffff00, #ff0000);
+  border-radius: 4px;
+}
+
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 5px;
+}
+
+.legend-unit {
+  text-align: center;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+/* ========== ECMWF 图层 ========== */
 .ecmwf-layers {
   display: flex;
   flex-direction: column;
@@ -553,7 +539,6 @@
   cursor: pointer;
   font-size: 13px;
   text-align: left;
-  width: 100%;
   transition: all 0.2s;
 }
 
@@ -567,7 +552,107 @@
   border-color: #0d6efd;
 }
 
-/* 天空颜色滑块 */
+/* ========== 图层管理 ========== */
+.layer-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.layer-group h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #495057;
+}
+
+.layer-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  margin-bottom: 5px;
+}
+
+.layer-opacity {
+  width: 100px;
+}
+
+/* ========== 监测卡片 ========== */
+.monitoring-types {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.monitoring-card {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.monitoring-icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.monitoring-card h4 {
+  margin: 10px 0 5px 0;
+  font-size: 14px;
+}
+
+.monitoring-card p {
+  color: #6c757d;
+  font-size: 13px;
+  margin-bottom: 15px;
+}
+
+/* ========== 模型库 ========== */
+.alphabet-tab {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.alphabet-btn {
+  padding: 5px 10px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.alphabet-btn:hover {
+  background: #e9ecef;
+}
+
+.library-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.model-div {
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.model-icon {
+  font-size: 32px;
+  margin-bottom: 5px;
+}
+
+/* ========== 天空颜色滑块 ========== */
+.sky-colour-section {
+  margin-top: 15px;
+}
+
 .blue-gradient-slider {
   background: linear-gradient(to right, #0d6efd 0%, #0d6efd 50%, #e9ecef 50%, #e9ecef 100%);
 }
@@ -582,10 +667,10 @@
   flex-direction: column;
   gap: 8px;
   z-index: 1000;
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
   padding: 10px;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
 }
 
 .right-toolbar .tool-btn {
@@ -602,7 +687,7 @@
   color: white;
   padding: 15px 20px;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 999;
   animation: slideIn 0.3s ease-out;
 }
@@ -630,21 +715,68 @@
   }
 }
 
-/* ========== 按钮 ========== */
-.btn-primary {
-  background: #0d6efd;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: background 0.2s;
+/* ========== 底部图例 ========== */
+.bottom-legend {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  z-index: 1000;
+  pointer-events: none;
 }
 
-.btn-primary:hover {
-  background: #0b5ed7;
+.distance-legend {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 5px 10px;
+  border-radius: 4px;
+  pointer-events: auto;
+}
+
+.distance-legend-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.distance-legend-scale-bar {
+  height: 4px;
+  background: #333;
+  width: 100px;
+  margin-top: 2px;
+}
+
+.bottom-logo {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #666;
+  pointer-events: auto;
+}
+
+/* ========== 警告框 ========== */
+.alert {
+  padding: 12px 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  font-size: 13px;
+}
+
+.alert-warning {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+
+/* ========== 实体列表 ========== */
+.entity-list {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin: 10px 0;
 }
 
 /* ========== 滚动条 ========== */
@@ -662,56 +794,35 @@
   border-radius: 3px;
 }
 
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
 /* ========== 响应式 ========== */
 @media (max-width: 768px) {
   .sidebar {
     width: 100%;
   }
 
-  .top-panel {
-    width: 95%;
+  .right-toolbar {
+    right: 5px;
+  }
+
+  .top-toolbar {
+    overflow-x: auto;
+  }
+
+  .tool-activation-toast {
+    right: 10px;
+    left: 10px;
+    top: 70px;
   }
 
   .monitoring-types {
     grid-template-columns: 1fr;
   }
 
-  .assessment-options {
-    grid-template-columns: 1fr;
+  .library-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
-}
-
-/* ========== Emoji 图标样式（新增） ========== */
-.emoji-icon {
-  font-size: 32px;
-  display: block;
-  text-align: center;
-  margin-bottom: 10px;
-  line-height: 1;
-  transition: transform 0.2s;
-}
-
-.emoji-icon-small {
-  font-size: 24px;
-  margin-right: 10px;
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.emoji-icon-large {
-  font-size: 48px;
-}
-
-/* Emoji 悬停效果 */
-.emoji-icon:hover {
-  transform: scale(1.1);
-}
-
-/* 监测卡片中的 emoji */
-.monitoring-card .emoji-icon {
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-}
-
-.monitoring-card:hover .emoji-icon {
-  transform: scale(1.2);
 }

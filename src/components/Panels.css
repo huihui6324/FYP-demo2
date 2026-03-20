@@ -1,0 +1,257 @@
+/* src/components/Panels.css */
+/* 顶部面板样式 */
+
+/* ========== 面板基础 ========== */
+.top-panel {
+  position: absolute;
+  top: 55px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  max-width: 90%;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  z-index: 1000;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  border-radius: 8px 8px 0 0;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.panel-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6c757d;
+  padding: 0 5px;
+}
+
+.panel-close:hover {
+  color: #dc3545;
+}
+
+.panel-content {
+  padding: 20px;
+}
+
+/* ========== Project Manager ========== */
+.project-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.project-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.project-code {
+  font-weight: 600;
+  color: #0d6efd;
+  min-width: 80px;
+}
+
+.project-version {
+  color: #6c757d;
+  min-width: 50px;
+}
+
+.project-name {
+  flex-grow: 1;
+}
+
+.project-stage {
+  color: #198754;
+  min-width: 150px;
+}
+
+.project-actions {
+  display: flex;
+  gap: 5px;
+}
+
+/* ========== Model Manager ========== */
+.upload-section {
+  margin-bottom: 20px;
+}
+
+.upload-section label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.help-text {
+  color: #6c757d;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.upload-section input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border: 2px dashed #dee2e6;
+  border-radius: 6px;
+  background: #f8f9fa;
+}
+
+.model-list {
+  padding: 20px;
+  text-align: center;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.empty-state {
+  color: #6c757d;
+}
+
+/* ========== Layer Manager ========== */
+.search-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.layer-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.layer-group h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #495057;
+}
+
+.layer-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  margin-bottom: 5px;
+}
+
+.layer-opacity {
+  width: 100px;
+}
+
+/* ========== Assessment Wizard ========== */
+.assessment-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.assessment-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.assessment-btn:hover {
+  background: #e9ecef;
+  border-color: #0d6efd;
+}
+
+/* ========== Monitoring Wizard ========== */
+.monitoring-types {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.monitoring-card {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.monitoring-card:hover {
+  background: #e9ecef;
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+.monitoring-card h4 {
+  margin: 10px 0 5px 0;
+  font-size: 14px;
+}
+
+.monitoring-card p {
+  color: #6c757d;
+  font-size: 13px;
+  margin-bottom: 15px;
+}
+
+/* ========== 工具激活提示 ========== */
+.tool-activation-toast {
+  position: absolute;
+  top: 70px;
+  right: 80px;
+  background: rgba(13, 110, 253, 0.95);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 999;
+  animation: slideIn 0.3s ease-out;
+}
+
+.tool-activation-toast span {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.tool-hint {
+  font-size: 13px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

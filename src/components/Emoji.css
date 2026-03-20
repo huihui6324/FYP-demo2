@@ -1,0 +1,87 @@
+/* src/components/Emoji.css */
+/* Emoji 图标样式 */
+
+/* ========== 通用 Emoji 基础样式 ========== */
+.emoji {
+  display: inline-block;
+  line-height: 1;
+  font-style: normal;
+  font-weight: normal;
+}
+
+/* ========== 顶部工具栏 Logo Emoji ========== */
+.toolbar-logo .emoji {
+  font-size: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* ========== 顶部工具栏按钮 Emoji ========== */
+.tool-btn .emoji {
+  font-size: 20px;
+  line-height: 1;
+  transition: transform 0.2s;
+}
+
+.tool-btn:hover .emoji {
+  transform: scale(1.1);
+}
+
+.tool-btn.primary .emoji {
+  font-size: 18px;
+}
+
+/* ========== 侧边栏面板标题 Emoji ========== */
+.model-section-header .emoji {
+  font-size: 16px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* ========== 监测卡片 Emoji（大图标） ========== */
+.emoji-icon {
+  font-size: 32px;
+  display: block;
+  text-align: center;
+  margin-bottom: 10px;
+  line-height: 1;
+  transition: transform 0.2s;
+}
+
+.emoji-icon-small {
+  font-size: 24px;
+  margin-right: 10px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.emoji-icon-large {
+  font-size: 48px;
+}
+
+/* ========== Emoji 悬停效果 ========== */
+.emoji-icon:hover {
+  transform: scale(1.1);
+}
+
+/* ========== 监测卡片中的 emoji ========== */
+.monitoring-card .emoji-icon {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.monitoring-card:hover .emoji-icon {
+  transform: scale(1.2);
+}
+
+/* ========== 表单中的 Emoji ========== */
+.checkbox-item .emoji {
+  margin-right: 5px;
+  font-size: 16px;
+}
+
+/* ========== 按钮中的 Emoji ========== */
+.btn-sm .emoji,
+.assessment-btn .emoji {
+  margin-right: 8px;
+  font-size: 18px;
+}

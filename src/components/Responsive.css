@@ -1,0 +1,38 @@
+/* src/components/Responsive.css */
+/* 响应式设计样式 */
+
+/* ========== 移动端优化（< 768px） ========== */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+  }
+
+  .top-panel {
+    width: 95%;
+  }
+
+  .monitoring-types {
+    grid-template-columns: 1fr;
+  }
+
+  .assessment-options {
+    grid-template-columns: 1fr;
+  }
+
+  .tool-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+}
+
+/* ========== 平板优化（768px - 1024px） ========== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar {
+    width: 300px;
+  }
+
+  .top-panel {
+    width: 700px;
+  }
+}
