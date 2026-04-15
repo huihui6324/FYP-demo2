@@ -119,22 +119,29 @@ function MapView() {
 
     const scene = viewer.scene;
 
-    // 雾效果
-    const fogDensity = climate.fog > 0 ? climate.fog / 5000 : 0;
+    // 雾效果 - 增强可见度
+    const fogDensity = climate.fog > 0 ? climate.fog / 2000 : 0;
     scene.fog.enabled = climate.fog > 0;
     scene.fog.density = fogDensity;
     scene.fog.screenSpaceErrorFactor = climate.fog > 0 ? 2 : 1;
     
-    // 阴天时调整雾颜色
+    // 根据雾浓度调整颜色
     if (climate.fog > 50) {
       scene.fog.color = new Cesium.Color(0.6, 0.6, 0.7, 1.0);
     } else {
       scene.fog.color = new Cesium.Color(0.0, 0.0, 0.0, 1.0);
     }
 
-    // 阴影
+    // 阴影 - 根据开关和光照启用状态
     viewer.shadows = climate.castShadows;
     scene.globe.enableLighting = climate.castShadows;
+    
+    // 根据时间更新太阳位置
+    const date = new Date();
+    date.setUTCHours(climate.hour - parseInt(climate.timezone), 45, 0, 0);
+    date.setUTCMonth(climate.month);
+    viewer.clock.currentTime = Cesium.JulianDate.fromDate(date);
+    viewer.clock.shouldAnimate = false;
 
     // 雨效果 - 使用粒子系统
     if (climate.rain) {
