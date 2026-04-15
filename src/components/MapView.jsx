@@ -1,11 +1,35 @@
 // src/components/MapView.jsx
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import * as Cesium from 'cesium'
 import { Ion } from 'cesium'
 import 'cesium/Build/Cesium/Widgets/widgets.css'
 
 // 配置 Cesium Ion Access Token
 Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5ODYzMGVjNy1hOGZmLTQzNTMtOGNiNC0wNmMzMzU3YjJmYzEiLCJpZCI6NDEzOTgzLCJpYXQiOjE3NzUzNzIwMDN9.alkn5QrNOGKTVFb4sx9jufiPe8LiOZQ3ruN0sihnJSU';
+
+// 创建雨滴图片（Base64）
+const createRaindropImage = () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 8;
+  canvas.height = 15;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'rgba(100, 150, 255, 0.8)';
+  ctx.fillRect(2, 0, 4, 15);
+  return canvas.toDataURL();
+};
+
+// 创建雪花图片（Base64）
+const createSnowflakeImage = () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 10;
+  canvas.height = 10;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+  ctx.beginPath();
+  ctx.arc(5, 5, 4, 0, Math.PI * 2);
+  ctx.fill();
+  return canvas.toDataURL();
+};
 
 // 引入所有 CSS 文件
 import './MapView.css'
@@ -23,6 +47,17 @@ import { ClimatePanel, TimePanel, WeatherPanel, PresentationPanel, SplitScreenPa
 function MapView() {
   const cesiumContainer = useRef(null)
   const [viewer, setViewer] = useState(null)
+  
+  // 缓存粒子图像生成函数
+  const raindropImageRef = useRef(null);
+  const snowflakeImageRef = useRef(null);
+  
+  if (!raindropImageRef.current) {
+    raindropImageRef.current = createRaindropImage();
+  }
+  if (!snowflakeImageRef.current) {
+    snowflakeImageRef.current = createSnowflakeImage();
+  }
   
   // 左侧面板展开状态
   const [leftPanels, setLeftPanels] = useState({
@@ -82,22 +117,93 @@ function MapView() {
   useEffect(() => {
     if (!viewer) return
 
-    // 雨雪效果
-    if (climate.rain) {
-      // TODO: 实现 Cesium 雨效果
-      console.log('Rain effect enabled')
-    }
-    if (climate.snow) {
-      // TODO: 实现 Cesium 雪效果
-      console.log('Snow effect enabled')
-    }
+    const scene = viewer.scene;
 
     // 雾效果
-    viewer.scene.fog.enabled = climate.fog > 0
-    viewer.scene.fog.density = climate.fog / 1000
+    const fogDensity = climate.fog > 0 ? climate.fog / 5000 : 0;
+    scene.fog.enabled = climate.fog > 0;
+    scene.fog.density = fogDensity;
+    scene.fog.screenSpaceErrorFactor = climate.fog > 0 ? 2 : 1;
+    
+    // 阴天时调整雾颜色
+    if (climate.fog > 50) {
+      scene.fog.color = new Cesium.Color(0.6, 0.6, 0.7, 1.0);
+    } else {
+      scene.fog.color = new Cesium.Color(0.0, 0.0, 0.0, 1.0);
+    }
 
     // 阴影
-    viewer.shadows = climate.castShadows
+    viewer.shadows = climate.castShadows;
+    scene.globe.enableLighting = climate.castShadows;
+
+    // 雨效果 - 使用粒子系统
+    if (climate.rain) {
+      if (!scene.rainSystem) {
+        // 创建雨滴粒子系统
+        scene.rainSystem = scene.primitives.add(new Cesium.ParticleSystem({
+          image: raindropImageRef.current,
+          startColor: new Cesium.Color(0.5, 0.6, 0.8, 0.8),
+          endColor: new Cesium.Color(0.5, 0.6, 0.8, 0.1),
+          startScale: 1.0,
+          endScale: 0.5,
+          minimumParticleLife: 0.5,
+          maximumParticleLife: 0.8,
+          minimumSpeed: 15.0,
+          maximumSpeed: 25.0,
+          imageSize: new Cesium.Cartesian2(8, 15),
+          emissionRate: 5000,
+          lifetime: 16.0,
+          systemLife: 16.0,
+          emitter: new Cesium.BoxEmitter(new Cesium.Cartesian3(1500, 1500, 150)),
+          modelMatrix: Cesium.Matrix4.fromTranslation(viewer.camera.position),
+          force: new Cesium.Cartesian3(0, 0, -9.81 * 2)
+        }));
+      }
+    } else {
+      if (scene.rainSystem) {
+        scene.primitives.remove(scene.rainSystem);
+        scene.rainSystem = null;
+      }
+    }
+
+    // 雪效果 - 使用粒子系统
+    if (climate.snow) {
+      if (!scene.snowSystem) {
+        // 创建雪花粒子系统
+        scene.snowSystem = scene.primitives.add(new Cesium.ParticleSystem({
+          image: snowflakeImageRef.current,
+          startColor: new Cesium.Color(1.0, 1.0, 1.0, 0.9),
+          endColor: new Cesium.Color(1.0, 1.0, 1.0, 0.3),
+          startScale: 2.0,
+          endScale: 1.0,
+          minimumParticleLife: 2.0,
+          maximumParticleLife: 4.0,
+          minimumSpeed: 2.0,
+          maximumSpeed: 5.0,
+          imageSize: new Cesium.Cartesian2(10, 10),
+          emissionRate: 2000,
+          lifetime: 16.0,
+          systemLife: 16.0,
+          emitter: new Cesium.BoxEmitter(new Cesium.Cartesian3(2000, 2000, 200)),
+          modelMatrix: Cesium.Matrix4.fromTranslation(viewer.camera.position),
+          force: new Cesium.Cartesian3(0, 0, -9.81 * 0.3)
+        }));
+      }
+    } else {
+      if (scene.snowSystem) {
+        scene.primitives.remove(scene.snowSystem);
+        scene.snowSystem = null;
+      }
+    }
+
+    // 更新粒子系统位置跟随相机
+    if (scene.rainSystem) {
+      scene.rainSystem.modelMatrix = Cesium.Matrix4.fromTranslation(viewer.camera.position);
+    }
+    if (scene.snowSystem) {
+      scene.snowSystem.modelMatrix = Cesium.Matrix4.fromTranslation(viewer.camera.position);
+    }
+
   }, [viewer, climate])
   
   // 初始化 Cesium
