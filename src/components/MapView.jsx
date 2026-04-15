@@ -112,11 +112,17 @@ function MapView() {
       navigationHelpButton: false,
       infoBox: true,
       selectionIndicator: true,
-      terrainProvider: undefined,
-      shouldAnimate: true
+      shouldAnimate: true,
+      requestRenderMode: false,
+      maximumRenderTimeChange: Infinity
     })
 
-    initViewer.terrainProvider = undefined
+    // 确保使用 Cesium Ion 默认影像服务
+    if (initViewer.imageryLayers.length === 0) {
+      initViewer.imageryLayers.addImageryProvider(
+        new Cesium.IonImageryProvider({ assetId: 2 })
+      )
+    }
 
     initViewer.camera.flyTo({
       destination: Cesium.Cartesian3.fromDegrees(114.17, 22.32, 15000),
