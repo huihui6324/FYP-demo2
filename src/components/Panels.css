@@ -187,6 +187,189 @@
   border-color: #0d6efd;
 }
 
+/* Assessment Config Styles */
+.assessment-config {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.config-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.config-header h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #212529;
+}
+
+.config-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #495057;
+}
+
+.form-select {
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+}
+
+.form-input {
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.form-range {
+  width: 100%;
+}
+
+.range-value {
+  font-size: 12px;
+  color: #6c757d;
+  text-align: right;
+}
+
+.config-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 15px;
+  border-top: 1px solid #e9ecef;
+}
+
+/* Assessment Results Styles */
+.assessment-results {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.results-header h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #198754;
+}
+
+.results-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.result-summary {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #198754;
+}
+
+.result-summary p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.result-viz {
+  padding: 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder-viz {
+  text-align: center;
+  color: white;
+}
+
+.placeholder-viz .emoji {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.placeholder-viz p {
+  margin: 5px 0;
+}
+
+.placeholder-viz .help-text {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 10px;
+}
+
+.result-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 15px;
+  border-top: 1px solid #e9ecef;
+}
+
+.btn-secondary {
+  padding: 10px 20px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+.btn-success {
+  padding: 10px 20px;
+  background: #198754;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.btn-success:hover {
+  background: #157347;
+}
+
 /* ========== Monitoring Wizard ========== */
 .monitoring-types {
   display: grid;
