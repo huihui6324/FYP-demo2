@@ -5,12 +5,12 @@ node_modules/
 # Build artifacts
 dist/
 build/
-target/
+*.js.map
 
 # Environment
 .env
 .env.local
-*.env.*
+.env.*
 
 # Editors
 .vscode/
@@ -26,49 +26,21 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Compiled
-*.o
-*.obj
-*.so
-*.a
-*.dll
-*.exe
+# OS generated files
+.DS_Store
+Thumbs.db
 
-# Coverage
+# Coverage reports
 coverage/
 htmlcov/
 .coverage
 
-# Compressed
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
-
-# System
-.DS_Store
-Thumbs.db
-
-# Cache
-.mypy_cache/
+# Testing
 .pytest_cache/
-.gradle/
+.mypy_cache/
+
+# Distribution / packaging
+*.tar.gz
+*.whl
+*.egg-info/
 ```
