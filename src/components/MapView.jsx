@@ -1,7 +1,11 @@
 // src/components/MapView.jsx
 import { useEffect, useRef, useState } from 'react'
 import * as Cesium from 'cesium'
+import { Ion } from 'cesium'
 import 'cesium/Build/Cesium/Widgets/widgets.css'
+
+// 配置 Cesium Ion Access Token
+Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5ODYzMGVjNy1hOGZmLTQzNTMtOGNiNC0wNmMzMzU3YjJmYzEiLCJpZCI6NDEzOTgzLCJpYXQiOjE3NzUzNzIwMDN9.alkn5QrNOGKTVFb4sx9jufiPe8LiOZQ3ruN0sihnJSU';
 
 // 引入所有 CSS 文件
 import './MapView.css'

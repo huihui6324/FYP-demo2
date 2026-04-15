@@ -6,7 +6,7 @@ __pycache__/
 *.obj
 dist/
 build/
-target/
+*.js.map
 
 # Dependencies
 .venv/
@@ -25,7 +25,7 @@ node_modules/
 # Environment
 .env
 .env.local
-*.env.*
+.env.*
 
 # Editors
 .vscode/
@@ -37,7 +37,7 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-# Coverage
+# Coverage reports
 coverage/
 htmlcov/
 .coverage
