@@ -148,6 +148,14 @@ function MapView() {
     // 雨效果 - 使用粒子系统
     if (climate.rain) {
       if (!scene.rainSystem) {
+        // 获取相机位置作为发射器中心
+        const cameraPos = viewer.camera.positionCartographic;
+        const center = Cesium.Cartesian3.fromRadians(
+          cameraPos.longitude,
+          cameraPos.latitude,
+          200 // 高于地面 200 米
+        );
+        
         // 创建雨滴粒子系统
         scene.rainSystem = scene.primitives.add(new Cesium.ParticleSystem({
           image: raindropImageRef.current,
@@ -160,12 +168,13 @@ function MapView() {
           minimumSpeed: 20.0,
           maximumSpeed: 30.0,
           imageSize: new Cesium.Cartesian2(8, 15),
-          emissionRate: 8000,
+          emissionRate: 5000,
           lifetime: 16.0,
           systemLife: 16.0,
-          emitter: new Cesium.BoxEmitter(new Cesium.Cartesian3(2000, 2000, 300)),
-          modelMatrix: Cesium.Matrix4.fromTranslation(viewer.camera.position),
-          force: new Cesium.Cartesian3(0, 0, -9.81 * 3)
+          emitter: new Cesium.BoxEmitter(new Cesium.Cartesian3(1000, 1000, 200)),
+          modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(center),
+          force: new Cesium.Cartesian3(0, 0, -9.81 * 3),
+          sizeInMeters: true
         }));
       }
     } else {
@@ -178,6 +187,13 @@ function MapView() {
     // 雪效果 - 使用粒子系统
     if (climate.snow) {
       if (!scene.snowSystem) {
+        const cameraPos = viewer.camera.positionCartographic;
+        const center = Cesium.Cartesian3.fromRadians(
+          cameraPos.longitude,
+          cameraPos.latitude,
+          200
+        );
+        
         // 创建雪花粒子系统
         scene.snowSystem = scene.primitives.add(new Cesium.ParticleSystem({
           image: snowflakeImageRef.current,
@@ -190,12 +206,15 @@ function MapView() {
           minimumSpeed: 1.0,
           maximumSpeed: 3.0,
           imageSize: new Cesium.Cartesian2(10, 10),
-          emissionRate: 4000,
+          emissionRate: 3000,
           lifetime: 16.0,
           systemLife: 16.0,
-          emitter: new Cesium.BoxEmitter(new Cesium.Cartesian3(2500, 2500, 300)),
-          modelMatrix: Cesium.Matrix4.fromTranslation(viewer.camera.position),
-          force: new Cesium.Cartesian3(0, 0, -9.81 * 0.2)
+          emitter: new Cesium.BoxEmitter(new Cesium.Cartesian3(1000, 1000, 200)),
+          modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(center),
+          force: new Cesium.Cartesian3(0, 0, -9.81 * 0.2),
+          sizeInMeters: true,
+          // 添加侧向力模拟风的效果
+          wind: new Cesium.Cartesian3(0.5, 0.5, 0)
         }));
       }
     } else {
@@ -203,14 +222,6 @@ function MapView() {
         scene.primitives.remove(scene.snowSystem);
         scene.snowSystem = null;
       }
-    }
-
-    // 更新粒子系统位置跟随相机
-    if (scene.rainSystem) {
-      scene.rainSystem.modelMatrix = Cesium.Matrix4.fromTranslation(viewer.camera.position);
-    }
-    if (scene.snowSystem) {
-      scene.snowSystem.modelMatrix = Cesium.Matrix4.fromTranslation(viewer.camera.position);
     }
 
   }, [viewer, climate])
