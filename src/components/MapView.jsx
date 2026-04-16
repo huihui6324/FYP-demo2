@@ -123,7 +123,7 @@ function MapView() {
     const fogDensity = climate.fog > 0 ? climate.fog / 2000 : 0;
     scene.fog.enabled = climate.fog > 0;
     scene.fog.density = fogDensity;
-    scene.fog.screenSpaceErrorFactor = climate.fog > 0 ? 2 : 1;
+    scene.fog.screenSpaceErrorFactor = climate.fog > 0 ? 5 : 1;
     
     // 根据雾浓度调整颜色
     if (climate.fog > 50) {
@@ -153,17 +153,17 @@ function MapView() {
           endColor: new Cesium.Color(0.5, 0.6, 0.8, 0.1),
           startScale: 1.0,
           endScale: 0.5,
-          minimumParticleLife: 0.5,
-          maximumParticleLife: 0.8,
-          minimumSpeed: 15.0,
-          maximumSpeed: 25.0,
+          minimumParticleLife: 0.4,
+          maximumParticleLife: 0.7,
+          minimumSpeed: 20.0,
+          maximumSpeed: 30.0,
           imageSize: new Cesium.Cartesian2(8, 15),
-          emissionRate: 5000,
+          emissionRate: 8000,
           lifetime: 16.0,
           systemLife: 16.0,
-          emitter: new Cesium.BoxEmitter(new Cesium.Cartesian3(1500, 1500, 150)),
+          emitter: new Cesium.BoxEmitter(new Cesium.Cartesian3(2000, 2000, 300)),
           modelMatrix: Cesium.Matrix4.fromTranslation(viewer.camera.position),
-          force: new Cesium.Cartesian3(0, 0, -9.81 * 2)
+          force: new Cesium.Cartesian3(0, 0, -9.81 * 3)
         }));
       }
     } else {
@@ -179,21 +179,21 @@ function MapView() {
         // 创建雪花粒子系统
         scene.snowSystem = scene.primitives.add(new Cesium.ParticleSystem({
           image: snowflakeImageRef.current,
-          startColor: new Cesium.Color(1.0, 1.0, 1.0, 0.9),
-          endColor: new Cesium.Color(1.0, 1.0, 1.0, 0.3),
-          startScale: 2.0,
-          endScale: 1.0,
-          minimumParticleLife: 2.0,
-          maximumParticleLife: 4.0,
-          minimumSpeed: 2.0,
-          maximumSpeed: 5.0,
+          startColor: new Cesium.Color(1.0, 1.0, 1.0, 0.95),
+          endColor: new Cesium.Color(1.0, 1.0, 1.0, 0.4),
+          startScale: 2.5,
+          endScale: 1.5,
+          minimumParticleLife: 3.0,
+          maximumParticleLife: 5.0,
+          minimumSpeed: 1.0,
+          maximumSpeed: 3.0,
           imageSize: new Cesium.Cartesian2(10, 10),
-          emissionRate: 2000,
+          emissionRate: 4000,
           lifetime: 16.0,
           systemLife: 16.0,
-          emitter: new Cesium.BoxEmitter(new Cesium.Cartesian3(2000, 2000, 200)),
+          emitter: new Cesium.BoxEmitter(new Cesium.Cartesian3(2500, 2500, 300)),
           modelMatrix: Cesium.Matrix4.fromTranslation(viewer.camera.position),
-          force: new Cesium.Cartesian3(0, 0, -9.81 * 0.3)
+          force: new Cesium.Cartesian3(0, 0, -9.81 * 0.2)
         }));
       }
     } else {
