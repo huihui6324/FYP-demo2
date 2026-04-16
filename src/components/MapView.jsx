@@ -119,29 +119,27 @@ function MapView() {
 
     const scene = viewer.scene;
 
-    // 雾效果 - 大幅增强可见度
-    const fogDensity = climate.fog > 0 ? climate.fog / 500 : 0;
+    // 雾效果 - 增强可见度
+    const fogDensity = climate.fog > 0 ? climate.fog / 2000 : 0;
     scene.fog.enabled = climate.fog > 0;
     scene.fog.density = fogDensity;
     scene.fog.screenSpaceErrorFactor = climate.fog > 0 ? 5 : 1;
     
-    // 根据雾浓度调整颜色（灰白色雾）
-    const fogIntensity = Math.min(climate.fog / 100, 1.0);
-    scene.fog.color = new Cesium.Color(0.7, 0.7, 0.75, 1.0).withAlpha(fogIntensity);
+    // 根据雾浓度调整颜色
+    if (climate.fog > 50) {
+      scene.fog.color = new Cesium.Color(0.6, 0.6, 0.7, 1.0);
+    } else {
+      scene.fog.color = new Cesium.Color(0.0, 0.0, 0.0, 1.0);
+    }
 
     // 阴影 - 根据开关和光照启用状态
     viewer.shadows = climate.castShadows;
     scene.globe.enableLighting = climate.castShadows;
     
-    // 根据时间更新太阳位置（制造明显的阴影变化）
+    // 根据时间更新太阳位置
     const date = new Date();
-    // 时区转换
-    const utcHour = climate.hour - parseInt(climate.timezone);
-    date.setUTCHours(utcHour, 0, 0, 0);
-    // 月份影响太阳高度角
-    date.setUTCMonth(climate.month - 1);
-    // 固定日期为春分/秋分附近，让阴影更明显
-    date.setUTCDate(21);
+    date.setUTCHours(climate.hour - parseInt(climate.timezone), 45, 0, 0);
+    date.setUTCMonth(climate.month);
     viewer.clock.currentTime = Cesium.JulianDate.fromDate(date);
     viewer.clock.shouldAnimate = false;
 
