@@ -1,17 +1,10 @@
 ```
-# Build artifacts
-dist/
-build/
-*.js
-
 # Dependencies
 node_modules/
 
-# Editors
-.vscode/
+# Build artifacts
+dist/
 
-# Environment
-.env
-.env.local
-*.env.*
+# Vite temporary files
+node_modules/.vite/
 ```

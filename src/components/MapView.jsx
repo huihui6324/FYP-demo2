@@ -361,7 +361,8 @@ function MapView() {
 
       {/* ========== 左侧侧边栏 ========== */}
       <aside className="sidebar">
-        <ClimatePanel 
+        <ClimatePanel
+          viewer={viewer} 
           climate={climate} 
           setClimate={setClimate} 
           isExpanded={leftPanels.climate} 
