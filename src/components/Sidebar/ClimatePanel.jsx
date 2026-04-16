@@ -45,44 +45,48 @@ export default function ClimatePanel({ climate, setClimate, viewer, isExpanded, 
       const emissionOrigin = Cesium.Cartesian3.fromRadians(
         cameraPosition.longitude,
         cameraPosition.latitude,
-        cameraPosition.height + 500
+        cameraPosition.height + 1000
       )
+
+      console.log(`Creating ${type} effect at height:`, cameraPosition.height)
 
       return scene.primitives.add(new Cesium.ParticleSystem({
         image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
         
-        startColor: isRain 
-          ? new Cesium.Color(0.5, 0.5, 0.8, 0.8)
-          : new Cesium.Color(1.0, 1.0, 1.0, 0.9),
+        startColor: isRain
+          ? new Cesium.Color(0.3, 0.3, 1.0, 1.0)
+          : new Cesium.Color(1.0, 1.0, 1.0, 1.0),
         
         endColor: isRain
-          ? new Cesium.Color(0.5, 0.5, 0.8, 0.1)
-          : new Cesium.Color(1.0, 1.0, 1.0, 0.1),
+          ? new Cesium.Color(0.3, 0.3, 1.0, 0.8)
+          : new Cesium.Color(1.0, 1.0, 1.0, 0.8),
         
-        startScale: isRain ? 0.5 : 1.5,
-        endScale: isRain ? 0.1 : 2.0,
+        startScale: isRain ? 1.0 : 3.0,
+        endScale: isRain ? 1.5 : 5.0,
         
-        minimumParticleLife: 1.2,
-        maximumParticleLife: 2.5,
+        minimumParticleLife: 2.0,
+        maximumParticleLife: 4.0,
         
-        minimumSpeed: isRain ? 150 : 20,
-        maximumSpeed: isRain ? 200 : 40,
+        minimumSpeed: isRain ? 100 : 10,
+        maximumSpeed: isRain ? 150 : 25,
         
-        imageSize: new Cesium.Cartesian2(isRain ? 2 : 6, isRain ? 10 : 6),
+        imageSize: new Cesium.Cartesian2(isRain ? 3 : 8, isRain ? 15 : 8),
         
-        emissionRate: isRain ? 5000 : 3000,
+        emissionRate: isRain ? 8000 : 5000,
         
         lifetime: 16.0,
         
-        emitter: new Cesium.SphereEmitter(isRain ? 200 : 400),
+        emitter: new Cesium.SphereEmitter(isRain ? 300 : 500),
         
         emitterModelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(emissionOrigin),
         
         modelMatrix: Cesium.Matrix4.IDENTITY,
         
-        force: new Cesium.Cartesian3(0, 0, isRain ? -9.8 * 20 : -1.0),
+        force: new Cesium.Cartesian3(0, 0, isRain ? -9.8 * 10 : -0.5),
         
-        sizeInMeters: true
+        sizeInMeters: true,
+        
+        depthFade: false
       }))
     }
 
