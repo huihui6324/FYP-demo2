@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import * as Cesium from 'cesium'
-import './Sidebar.css'
+import '../Sidebar.css'
 
 export default function ClimatePanel({ climate, setClimate, viewer, isExpanded, onToggle }) {
   const rainEffectRef = useRef(null)

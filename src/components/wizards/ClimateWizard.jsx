@@ -46,10 +46,9 @@ function ClimateWizard({ viewer }) {
       viewer.scene.primitives.remove(rainSystem.current)
     }
 
-    // 创建新的雨粒子系统
+    // 创建新的雨粒子系统 - 使用程序生成的粒子，不依赖外部图片
     rainSystem.current = viewer.scene.primitives.add(
       new Cesium.ParticleSystem({
-        image: '/raindrop.png', // 需要雨滴图片，或用下面的替代方案
         startColor: Cesium.Color.LIGHTBLUE.withAlpha(0.5),
         endColor: Cesium.Color.LIGHTBLUE.withAlpha(0.1),
         startScale: 1.0,
@@ -58,7 +57,7 @@ function ClimateWizard({ viewer }) {
         maximumParticleLife: 2.0,
         minimumSpeed: 10.0,
         maximumSpeed: 20.0,
-        imageSize: new Cesium.Cartesian2(10, 10),
+        imageSize: new Cesium.Cartesian2(2, 10), // 细长的雨滴形状
         emissionRate: 5000,
         lifetime: 16.0,
         systemLifeTime: 1000.0,
@@ -72,7 +71,9 @@ function ClimateWizard({ viewer }) {
         force: {
           minimum: new Cesium.Cartesian3(0, 0, -10),
           maximum: new Cesium.Cartesian3(0, 0, -20)
-        }
+        },
+        // 使用内置的正方形粒子，不需要外部图片
+        particleAlign: Cesium.ParticleAlignType.FIXED
       })
     )
   }
@@ -87,7 +88,6 @@ function ClimateWizard({ viewer }) {
 
     snowSystem.current = viewer.scene.primitives.add(
       new Cesium.ParticleSystem({
-        image: '/snowflake.png',
         startColor: Cesium.Color.WHITE.withAlpha(0.8),
         endColor: Cesium.Color.WHITE.withAlpha(0.1),
         startScale: 1.0,
@@ -110,7 +110,9 @@ function ClimateWizard({ viewer }) {
         force: {
           minimum: new Cesium.Cartesian3(0, 0, -2),
           maximum: new Cesium.Cartesian3(0, 0, -5)
-        }
+        },
+        // 使用内置的正方形粒子，不需要外部图片
+        particleAlign: Cesium.ParticleAlignType.FIXED
       })
     )
   }
