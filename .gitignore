@@ -1,4 +1,23 @@
 ```
 # Build artifacts
 dist/
+build/
+
+# Dependencies
+node_modules/
+
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+*.env.*
 ```
