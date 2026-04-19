@@ -1,5 +1,6 @@
 torch
-ultralytics import YOLO
-torchvision.ops as ops
-cv2
-os
+ultralytics
+opencv-python
+Pillow
+flask
+flask-cors

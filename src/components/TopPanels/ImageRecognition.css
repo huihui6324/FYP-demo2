@@ -1,0 +1,296 @@
+/* Image Recognition Panel Styles */
+.image-recognition-panel {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.image-recognition-panel .panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px 8px 0 0;
+}
+
+.image-recognition-panel .panel-header h3 {
+  margin: 0;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.image-recognition-panel .panel-header .emoji {
+  font-size: 20px;
+}
+
+.image-recognition-panel .panel-content {
+  padding: 20px;
+}
+
+/* Upload Section */
+.image-recognition-panel .upload-section {
+  margin-bottom: 20px;
+}
+
+.image-recognition-panel .upload-section label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.image-recognition-panel .help-text {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.image-recognition-panel input[type="file"] {
+  width: 100%;
+  padding: 12px;
+  border: 2px dashed #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #f9f9f9;
+  transition: border-color 0.3s;
+}
+
+.image-recognition-panel input[type="file"]:hover {
+  border-color: #667eea;
+}
+
+/* Preview Section */
+.image-recognition-panel .preview-section {
+  margin-bottom: 20px;
+}
+
+.image-recognition-panel .image-container {
+  margin-bottom: 16px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.image-recognition-panel .preview-image {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  display: block;
+}
+
+.image-recognition-panel .action-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+/* Buttons */
+.image-recognition-panel .btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.image-recognition-panel .btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.image-recognition-panel .btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.image-recognition-panel .btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.image-recognition-panel .btn-secondary:hover:not(:disabled) {
+  background: #e0e0e0;
+}
+
+.image-recognition-panel .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading State */
+.image-recognition-panel .loading-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.image-recognition-panel .spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.image-recognition-panel .loading-state p {
+  color: #666;
+  font-size: 14px;
+}
+
+/* Error State */
+.image-recognition-panel .error-state {
+  padding: 16px;
+  background: #fff3f3;
+  border: 1px solid #ffcccc;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.image-recognition-panel .error-message {
+  color: #d32f2f;
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Results Section */
+.image-recognition-panel .results-section {
+  margin-top: 20px;
+}
+
+.image-recognition-panel .results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.image-recognition-panel .results-header h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.image-recognition-panel .detection-count {
+  font-size: 13px;
+  color: #667eea;
+  font-weight: 600;
+  background: #f0f0ff;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.image-recognition-panel .annotated-image-container {
+  margin-bottom: 20px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.image-recognition-panel .annotated-image {
+  width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Detections List */
+.image-recognition-panel .detections-list {
+  background: #f9f9f9;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.image-recognition-panel .detections-list h5 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: #666;
+}
+
+.image-recognition-panel .detections-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.image-recognition-panel .detection-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: white;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-size: 13px;
+}
+
+.image-recognition-panel .detection-item:last-child {
+  margin-bottom: 0;
+}
+
+.image-recognition-panel .class-name {
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+}
+
+.image-recognition-panel .confidence {
+  color: #4caf50;
+  font-weight: 600;
+  margin: 0 12px;
+  background: #e8f5e9;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.image-recognition-panel .bbox {
+  color: #999;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+/* Empty State */
+.image-recognition-panel .empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .image-recognition-panel {
+    max-width: 100%;
+    width: 95%;
+  }
+  
+  .image-recognition-panel .detection-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .image-recognition-panel .confidence,
+  .image-recognition-panel .bbox {
+    margin: 0;
+  }
+}
