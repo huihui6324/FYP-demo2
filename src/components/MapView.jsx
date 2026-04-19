@@ -41,7 +41,7 @@ import './Emoji.css'
 import './Responsive.css'
 
 // 引入拆分后的组件
-import { ProjectManager, ModelManager, LayerManager, AssessmentWizard, MonitoringWizard } from './TopPanels'
+import { ProjectManager, ModelManager, LayerManager, AssessmentWizard, MonitoringWizard, ImageRecognition } from './TopPanels'
 import { ClimatePanel, TimePanel, WeatherPanel, PresentationPanel, SplitScreenPanel, LayerSelectPanel } from './Sidebar'
 
 function MapView() {
@@ -78,7 +78,8 @@ function MapView() {
     modelManager: false,
     layerManager: false,
     assessmentWizard: false,
-    monitoringWizard: false
+    monitoringWizard: false,
+    imageRecognition: false
   })
   
   // 气候状态
@@ -323,6 +324,13 @@ function MapView() {
           >
             <span className="emoji">🔍</span>
           </button>
+          <button
+            className={`tool-btn ${topPanels.imageRecognition ? 'active' : ''}`}
+            title="Image Recognition"
+            onClick={() => toggleTopPanel('imageRecognition')}
+          >
+            <span className="emoji">🖼️</span>
+          </button>
           <button className="tool-btn" title="Presentation Wizard" onClick={() => toggleLeftPanel('presentation')}>
             <span className="emoji">🎬</span>
           </button>
@@ -356,6 +364,7 @@ function MapView() {
       {topPanels.layerManager && <LayerManager onClose={() => toggleTopPanel('layerManager')} />}
       {topPanels.assessmentWizard && <AssessmentWizard onClose={() => toggleTopPanel('assessmentWizard')} />}
       {topPanels.monitoringWizard && <MonitoringWizard onClose={() => toggleTopPanel('monitoringWizard')} />}
+      {topPanels.imageRecognition && <ImageRecognition onClose={() => toggleTopPanel('imageRecognition')} />}
 
       {/* ========== 左侧侧边栏 ========== */}
       <aside className="sidebar">
