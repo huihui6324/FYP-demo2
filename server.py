@@ -12,9 +12,9 @@ app = Flask(__name__)
 CORS(app)
 
 # Load YOLO model - Update this path to your local model path
-model_path = r'C:\Users\19828\IdeaProjects\FYP-demo2\src\model\best.pt'
+# model_path = r'C:\Users\19828\IdeaProjects\FYP-demo2\src\model\best.pt'
 # Alternative relative path if server.py is in project root:
-# model_path = os.path.join(os.path.dirname(__file__), 'src', 'model', 'best.pt')
+model_path = os.path.join(os.path.dirname(__file__), 'src', 'model', 'best.pt')
 model = YOLO(model_path)
 
 @app.route('/api/predict', methods=['POST'])
