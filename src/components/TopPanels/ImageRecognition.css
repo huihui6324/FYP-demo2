@@ -36,6 +36,32 @@
   padding: 20px;
 }
 
+
+.image-recognition-panel .runtime-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f4f6ff;
+  border: 1px solid #dbe2ff;
+  color: #374151;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+
+.image-recognition-panel .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #f59e0b;
+  flex-shrink: 0;
+}
+
+.image-recognition-panel .status-dot.ready {
+  background: #22c55e;
+}
+
 /* Upload Section */
 .image-recognition-panel .upload-section {
   margin-bottom: 20px;
