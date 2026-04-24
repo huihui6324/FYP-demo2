@@ -184,6 +184,7 @@ function decodeYoloOutput(outputTensor, meta) {
   let channels
   let candidates
   let channelMajor = true
+  let channels6Mode = 'v8_binary'
 
   if (dims.length !== 3) {
     throw new Error(`Unsupported ONNX output dims: [${dims.join(', ')}]`)
@@ -204,6 +205,20 @@ function decodeYoloOutput(outputTensor, meta) {
     throw new Error(`Unexpected YOLO output channels: ${channels}. 请确认导出的是检测模型（detect）且未选错输出张量。`)
   }
 
+  if (channels === 6) {
+    // Auto infer 6-channel head type:
+    // - v8 binary head: [x, y, w, h, cls0, cls1], cls0+cls1 tends to ~1 after normalization
+    // - v5 single-class head: [x, y, w, h, obj, cls], obj/cls are independent
+    const sampleCount = Math.min(candidates, 80)
+    let nearOne = 0
+    for (let i = 0; i < sampleCount; i += 1) {
+      const g = (c) => (channelMajor ? data[c * candidates + i] : data[i * channels + c])
+      const sum = normalizeScore(g(4)) + normalizeScore(g(5))
+      if (Math.abs(sum - 1) < 0.2) nearOne += 1
+    }
+    channels6Mode = nearOne / Math.max(1, sampleCount) >= 0.6 ? 'v8_binary' : 'v5_single'
+  }
+
   const detections = []
 
   for (let i = 0; i < candidates; i += 1) {
@@ -218,10 +233,18 @@ function decodeYoloOutput(outputTensor, meta) {
     let bestClassA = 0
     let bestScoreA = 0
     if (channels === 6) {
-      // Binary model (bird/non-bird): [x, y, w, h, cls0, cls1]
-      const [p0, p1] = normalizeBinaryPair(getter(4), getter(5))
-      bestClassA = p1 > p0 ? 1 : 0
-      bestScoreA = Math.max(p0, p1)
+      if (channels6Mode === 'v5_single') {
+        // [x, y, w, h, obj, cls] -> bird score = obj * cls
+        const obj = normalizeScore(getter(4))
+        const cls = normalizeScore(getter(5))
+        bestClassA = 0
+        bestScoreA = obj * cls
+      } else {
+        // [x, y, w, h, cls0, cls1]
+        const [p0, p1] = normalizeBinaryPair(getter(4), getter(5))
+        bestClassA = p1 > p0 ? 1 : 0
+        bestScoreA = Math.max(p0, p1)
+      }
     } else {
       for (let cls = 0; cls < channels - 4; cls += 1) {
         const score = normalizeScore(getter(4 + cls))
@@ -435,9 +458,13 @@ export default function ImageRecognition({ onClose }) {
       const data = mode === 'browser' ? await runBrowserPredict() : await runBackendPredict()
       setResult(data)
     } catch (err) {
+      if (mode === 'browser') {
+        // Avoid repeated browser-runtime failures impacting page usability.
+        setMode('backend')
+      }
       setError(
         `${err.message || 'Inference failed'}。` +
-          '若提示模型不可访问，请确认 public/models/best.onnx 并重启 npm run dev；若提示 external data file，请用导出脚本加 --inline-weights；若 CDN 被拦截，请把 ort.min.js 放到 public/vendor/。'
+          '若提示模型不可访问，请确认 public/models/best.onnx 并重启 npm run dev；若提示 external data file，请用导出脚本加 --inline-weights；若 CDN 被拦截，请把 ort.min.js 放到 public/vendor/。已自动切换到 Backend API 模式。'
       )
     } finally {
       setLoading(false)

@@ -181,6 +181,7 @@ npm run dev
 如果你的训练标签顺序相反（例如 `class_0 -> non-bird`），只需把 `DEFAULT_CLASS_NAMES` 改成对应顺序即可。
 
 > 若你是鸟类/非鸟类二分类模型（输出 6 通道），前端会按二分类头解码，并对二分类分数做归一化/softmax，概率显示会更合理。
+> 若你的 6 通道其实是单类 YOLOv5 头（`[x,y,w,h,obj,cls]`），前端会自动识别并改用 `obj * cls` 计算概率，避免数值偏差。
 
 > 说明：组件会自动从 CDN 加载 `onnxruntime-web`，首次推理会稍慢。
 
@@ -196,6 +197,8 @@ npm run dev
 2. **模型路径问题**：确认模型在 `public/models/best.onnx`，并使用界面默认路径（会自动带 `BASE_URL`）；或在界面里直接上传 `.onnx` 文件。
 3. **external data 报错**：若看到 `failed to load external data file`，请重新导出并加 `--inline-weights`。
 4. **快速兜底**：切换到 `Backend API` 模式，填写 `http://localhost:5000/api/predict`，走原 Flask 推理链路。
+
+> 另外：若浏览器 ONNX 加载失败，界面会自动切回 `Backend API`，避免影响地图页面其它功能。
 
 ### 更新代码后先做版本确认（建议）
 
