@@ -367,6 +367,7 @@ export default function ImageRecognition({ onClose }) {
               <button className="btn btn-secondary" onClick={handleClear} disabled={loading}>
                 Clear
               </button>
+              <button className="btn btn-secondary" onClick={handleClear} disabled={loading}>Clear</button>
             </div>
           </div>
         )}
