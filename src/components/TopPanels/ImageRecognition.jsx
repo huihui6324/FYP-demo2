@@ -212,7 +212,10 @@ function decodeYoloOutput(outputTensor, meta) {
     // Strategy B: YOLOv5-style (with objectness): [x, y, w, h, obj, cls...]
     let bestClassB = 0
     let bestScoreB = 0
-    if (channels >= 6) {
+    // For binary YOLOv8 heads (e.g. 4 + 2 classes => 6 channels),
+    // index 4 is a class score, not objectness.
+    // Only enable v5-style objectness branch when channels clearly allow [x,y,w,h,obj,cls...].
+    if (channels >= 7) {
       const objectness = normalizeScore(getter(4))
       for (let cls = 0; cls < channels - 5; cls += 1) {
         const clsScore = normalizeScore(getter(5 + cls))
