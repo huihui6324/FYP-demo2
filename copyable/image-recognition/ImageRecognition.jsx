@@ -142,6 +142,22 @@ function normalizeScore(raw) {
   return sigmoid(raw)
 }
 
+function normalizeBinaryPair(a, b) {
+  // If outputs look like probabilities, normalize to sum=1 for clearer display.
+  if (a >= 0 && a <= 1 && b >= 0 && b <= 1) {
+    const sum = a + b
+    if (sum <= 1e-6) return [0.5, 0.5]
+    return [a / sum, b / sum]
+  }
+
+  // Otherwise treat as logits and apply softmax.
+  const m = Math.max(a, b)
+  const ea = Math.exp(a - m)
+  const eb = Math.exp(b - m)
+  const sum = ea + eb
+  return [ea / sum, eb / sum]
+}
+
 function decodeYoloOutput(outputTensor, meta) {
   const { data, dims } = outputTensor
 
@@ -201,11 +217,18 @@ function decodeYoloOutput(outputTensor, meta) {
     // Strategy A: YOLOv8-style (no objectness): [x, y, w, h, cls...]
     let bestClassA = 0
     let bestScoreA = 0
-    for (let cls = 0; cls < channels - 4; cls += 1) {
-      const score = normalizeScore(getter(4 + cls))
-      if (score > bestScoreA) {
-        bestScoreA = score
-        bestClassA = cls
+    if (channels === 6) {
+      // Binary model (bird/non-bird): [x, y, w, h, cls0, cls1]
+      const [p0, p1] = normalizeBinaryPair(getter(4), getter(5))
+      bestClassA = p1 > p0 ? 1 : 0
+      bestScoreA = Math.max(p0, p1)
+    } else {
+      for (let cls = 0; cls < channels - 4; cls += 1) {
+        const score = normalizeScore(getter(4 + cls))
+        if (score > bestScoreA) {
+          bestScoreA = score
+          bestClassA = cls
+        }
       }
     }
 
@@ -291,7 +314,7 @@ export default function ImageRecognition({ onClose }) {
   const [error, setError] = useState(null)
   const [runtimeReady, setRuntimeReady] = useState(false)
   const [runtimeSource, setRuntimeSource] = useState('unloaded')
-  const [mode, setMode] = useState('browser')
+  const [mode, setMode] = useState('backend')
   const [modelPath, setModelPath] = useState(DEFAULT_MODEL_PATH)
   const [backendUrl, setBackendUrl] = useState(DEFAULT_BACKEND_URL)
   const [modelFile, setModelFile] = useState(null)
