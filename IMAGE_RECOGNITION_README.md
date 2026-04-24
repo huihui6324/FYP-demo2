@@ -178,6 +178,8 @@ npm run dev
 
 如果你的训练标签顺序相反（例如 `class_0 -> non-bird`），只需把 `DEFAULT_CLASS_NAMES` 改成对应顺序即可。
 
+> 若你是鸟类/非鸟类二分类模型（输出 6 通道），前端会按二分类头解码，不再把第 5 通道误当 objectness，概率显示会更合理。
+
 > 说明：组件会自动从 CDN 加载 `onnxruntime-web`，首次推理会稍慢。
 
 ### CDN 被拦截 / 模型 404 的处理
