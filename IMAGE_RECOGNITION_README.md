@@ -196,3 +196,5 @@ python src/model/export_web_onnx.py --help
 确认帮助中包含 `--inline-weights`，再执行导出命令。
 
 > follow-up merge marker: 2026-04-24
+
+> merge-resubmit marker: 2026-04-24-b
