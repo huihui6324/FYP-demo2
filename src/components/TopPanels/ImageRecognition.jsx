@@ -178,13 +178,10 @@ function decodeYoloOutput(outputTensor, meta) {
     channelMajor = false
   }
 
-  if (channels < 6) {
-    throw new Error(`Unexpected YOLO output channels: ${channels}`)
+  if (channels < 5) {
+    throw new Error(`Unexpected YOLO output channels: ${channels}. 请确认导出的是检测模型（detect）且未选错输出张量。`)
   }
 
-  const hasObjectness = channels >= 7
-  const classStart = hasObjectness ? 5 : 4
-  const classCount = channels - classStart
   const detections = []
 
   for (let i = 0; i < candidates; i += 1) {
@@ -195,18 +192,35 @@ function decodeYoloOutput(outputTensor, meta) {
     const w = getter(2)
     const h = getter(3)
 
-    const objectness = hasObjectness ? normalizeScore(getter(4)) : 1
-
-    let bestClass = 0
-    let bestScore = 0
-    for (let cls = 0; cls < classCount; cls += 1) {
-      const clsScore = normalizeScore(getter(classStart + cls))
-      const score = objectness * clsScore
-      if (score > bestScore) {
-        bestScore = score
-        bestClass = cls
+    // Strategy A: YOLOv8-style (no objectness): [x, y, w, h, cls...]
+    let bestClassA = 0
+    let bestScoreA = 0
+    for (let cls = 0; cls < channels - 4; cls += 1) {
+      const score = normalizeScore(getter(4 + cls))
+      if (score > bestScoreA) {
+        bestScoreA = score
+        bestClassA = cls
       }
     }
+
+    // Strategy B: YOLOv5-style (with objectness): [x, y, w, h, obj, cls...]
+    let bestClassB = 0
+    let bestScoreB = 0
+    if (channels >= 6) {
+      const objectness = normalizeScore(getter(4))
+      for (let cls = 0; cls < channels - 5; cls += 1) {
+        const clsScore = normalizeScore(getter(5 + cls))
+        const score = objectness * clsScore
+        if (score > bestScoreB) {
+          bestScoreB = score
+          bestClassB = cls
+        }
+      }
+    }
+
+    const useObjHead = bestScoreB > bestScoreA
+    const bestScore = useObjHead ? bestScoreB : bestScoreA
+    const bestClass = useObjHead ? bestClassB : bestClassA
 
     if (bestScore < CONF_THRESHOLD) continue
 
@@ -337,8 +351,19 @@ export default function ImageRecognition({ onClose }) {
     const tensor = new ort.Tensor('float32', prep.input, [1, 3, INPUT_SIZE, INPUT_SIZE])
 
     const outputMap = await ortSession.run({ [inputName]: tensor })
-    const outputName = ortSession.outputNames[0]
-    const outputTensor = outputMap[outputName]
+
+    // Some exports provide multiple outputs (e.g. boxes/scores separated).
+    // Prefer a tensor that looks like YOLO logits: [1, C, N] or [1, N, C] with C >= 5.
+    const outputTensors = Object.values(outputMap)
+    const preferredTensor = outputTensors.find((t) => {
+      const d = t.dims || []
+      if (d.length !== 3) return false
+      const looksLikeChannelsFirst = d[1] <= 256 && d[1] >= 5
+      const looksLikeChannelsLast = d[2] <= 256 && d[2] >= 5
+      return looksLikeChannelsFirst || looksLikeChannelsLast
+    })
+
+    const outputTensor = preferredTensor || outputMap[ortSession.outputNames[0]]
 
     const detections = decodeYoloOutput(outputTensor, prep).map((det) => ({
       ...det,
@@ -354,179 +379,6 @@ export default function ImageRecognition({ onClose }) {
       detections,
       annotated_image: annotatedImage,
     }
-    reader.readAsDataURL(file)
-  }
-
-  const handleModelFileChange = (e) => {
-    const file = e.target.files[0]
-    setModelFile(file || null)
-    sessionRef.current = null
-    setRuntimeReady(false)
-  }
-
-  const ensureBrowserSession = async () => {
-    if (sessionRef.current) return sessionRef.current
-
-    const { ort, source } = await ensureOrtLoaded()
-    ort.env.wasm.wasmPaths = source === 'local' ? `${BASE_URL}vendor/` : 'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/'
-
-    let resolvedModel = modelPath
-    if (modelFile) {
-      if (modelUrlRef.current) URL.revokeObjectURL(modelUrlRef.current)
-      modelUrlRef.current = URL.createObjectURL(modelFile)
-      resolvedModel = modelUrlRef.current
-    } else {
-      await assertModelReachable(resolvedModel)
-    }
-
-    const ortSession = await ort.InferenceSession.create(resolvedModel, {
-      executionProviders: ['wasm'],
-      graphOptimizationLevel: 'all',
-    })
-
-    sessionRef.current = { ort, session: ortSession }
-    setRuntimeReady(true)
-    setRuntimeSource(source)
-    return sessionRef.current
-  }
-
-  const runBrowserPredict = async () => {
-    const browserRuntime = await ensureBrowserSession()
-    const ort = browserRuntime.ort
-    const ortSession = browserRuntime.session
-    const image = await imageFromDataUrl(previewUrl)
-    const prep = preprocessImage(image)
-    const inputName = ortSession.inputNames[0]
-    const tensor = new ort.Tensor('float32', prep.input, [1, 3, INPUT_SIZE, INPUT_SIZE])
-
-    const outputMap = await ortSession.run({ [inputName]: tensor })
-    const outputName = ortSession.outputNames[0]
-    const outputTensor = outputMap[outputName]
-
-    const detections = decodeYoloOutput(outputTensor, prep).map((det) => ({
-      ...det,
-      class_name: `class_${det.class_id}`,
-      bbox: [det.x1, det.y1, det.x2, det.y2],
-    }))
-
-    const annotatedImage = await drawDetections(previewUrl, detections)
-
-    return {
-      success: true,
-      count: detections.length,
-      detections,
-      annotated_image: annotatedImage,
-    }
-
-    const session = await ort.InferenceSession.create(resolvedModel, {
-      executionProviders: ['wasm'],
-      graphOptimizationLevel: 'all',
-    })
-
-    sessionRef.current = { ort, session }
-    setRuntimeReady(true)
-    setRuntimeSource(source)
-    return sessionRef.current
-  }
-
-  const runBrowserPredict = async () => {
-    const { ort, session } = await ensureBrowserSession()
-    const image = await imageFromDataUrl(previewUrl)
-    const prep = preprocessImage(image)
-    const inputName = session.inputNames[0]
-    const tensor = new ort.Tensor('float32', prep.input, [1, 3, INPUT_SIZE, INPUT_SIZE])
-
-    const outputMap = await session.run({ [inputName]: tensor })
-    const outputName = session.outputNames[0]
-    const outputTensor = outputMap[outputName]
-
-    const detections = decodeYoloOutput(outputTensor, prep).map((det) => ({
-      ...det,
-      class_name: `class_${det.class_id}`,
-      bbox: [det.x1, det.y1, det.x2, det.y2],
-    }))
-
-    const annotatedImage = await drawDetections(previewUrl, detections)
-
-    return {
-      success: true,
-      count: detections.length,
-      detections,
-      annotated_image: annotatedImage,
-    }
-
-    const session = await ort.InferenceSession.create(resolvedModel, {
-      executionProviders: ['wasm'],
-      graphOptimizationLevel: 'all',
-    })
-
-    sessionRef.current = { ort, session }
-    setRuntimeReady(true)
-    setRuntimeSource(source)
-    return sessionRef.current
-  }
-
-  const runBrowserPredict = async () => {
-    const { ort, session } = await ensureBrowserSession()
-    const image = await imageFromDataUrl(previewUrl)
-    const prep = preprocessImage(image)
-    const inputName = session.inputNames[0]
-    const tensor = new ort.Tensor('float32', prep.input, [1, 3, INPUT_SIZE, INPUT_SIZE])
-
-    const outputMap = await session.run({ [inputName]: tensor })
-    const outputName = session.outputNames[0]
-    const outputTensor = outputMap[outputName]
-
-    const detections = decodeYoloOutput(outputTensor, prep).map((det) => ({
-      ...det,
-      class_name: `class_${det.class_id}`,
-      bbox: [det.x1, det.y1, det.x2, det.y2],
-    }))
-
-    const annotatedImage = await drawDetections(previewUrl, detections)
-
-    return {
-      success: true,
-      count: detections.length,
-      detections,
-      annotated_image: annotatedImage,
-    }
-  }
-
-  const runBackendPredict = async () => {
-    const response = await fetch(backendUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: previewUrl }),
-    })
-
-    const data = await response.json()
-    if (!response.ok) throw new Error(data.error || 'Backend prediction failed')
-    return data
-  }
-
-  const runBackendPredict = async () => {
-    const response = await fetch(backendUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: previewUrl }),
-    })
-
-    const data = await response.json()
-    if (!response.ok) throw new Error(data.error || 'Backend prediction failed')
-    return data
-  }
-
-  const runBackendPredict = async () => {
-    const response = await fetch(backendUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: previewUrl }),
-    })
-
-    const data = await response.json()
-    if (!response.ok) throw new Error(data.error || 'Backend prediction failed')
-    return data
   }
 
   const runBackendPredict = async () => {
