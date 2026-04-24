@@ -125,6 +125,17 @@ function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value))
 }
 
+function sigmoid(x) {
+  const z = Math.max(-50, Math.min(50, x))
+  return 1 / (1 + Math.exp(-z))
+}
+
+function normalizeScore(raw) {
+  if (Number.isNaN(raw)) return 0
+  if (raw >= 0 && raw <= 1) return raw
+  return sigmoid(raw)
+}
+
 function decodeYoloOutput(outputTensor, meta) {
   const { data, dims } = outputTensor
 
@@ -133,7 +144,7 @@ function decodeYoloOutput(outputTensor, meta) {
     const detections = []
     for (let i = 0; i < rows; i += 1) {
       const offset = i * 6
-      const confidence = data[offset + 4]
+      const confidence = normalizeScore(data[offset + 4])
       if (confidence < CONF_THRESHOLD) continue
 
       detections.push({
@@ -152,22 +163,28 @@ function decodeYoloOutput(outputTensor, meta) {
   let candidates
   let channelMajor = true
 
-  if (dims.length === 3 && dims[1] > dims[2]) {
+  if (dims.length !== 3) {
+    throw new Error(`Unsupported ONNX output dims: [${dims.join(', ')}]`)
+  }
+
+  // channels is usually small (e.g. 84/85), candidates is usually large (e.g. 8400)
+  if (dims[1] <= 256) {
     channels = dims[1]
     candidates = dims[2]
-  } else if (dims.length === 3) {
+    channelMajor = true
+  } else {
     channels = dims[2]
     candidates = dims[1]
     channelMajor = false
-  } else {
-    throw new Error(`Unsupported ONNX output dims: [${dims.join(', ')}]`)
   }
 
   if (channels < 6) {
     throw new Error(`Unexpected YOLO output channels: ${channels}`)
   }
 
-  const classCount = channels - 4
+  const hasObjectness = channels >= 7
+  const classStart = hasObjectness ? 5 : 4
+  const classCount = channels - classStart
   const detections = []
 
   for (let i = 0; i < candidates; i += 1) {
@@ -178,10 +195,13 @@ function decodeYoloOutput(outputTensor, meta) {
     const w = getter(2)
     const h = getter(3)
 
+    const objectness = hasObjectness ? normalizeScore(getter(4)) : 1
+
     let bestClass = 0
     let bestScore = 0
     for (let cls = 0; cls < classCount; cls += 1) {
-      const score = getter(4 + cls)
+      const clsScore = normalizeScore(getter(classStart + cls))
+      const score = objectness * clsScore
       if (score > bestScore) {
         bestScore = score
         bestClass = cls
@@ -332,6 +352,55 @@ export default function ImageRecognition({ onClose }) {
       detections,
       annotated_image: annotatedImage,
     }
+
+    const session = await ort.InferenceSession.create(resolvedModel, {
+      executionProviders: ['wasm'],
+      graphOptimizationLevel: 'all',
+    })
+
+    sessionRef.current = { ort, session }
+    setRuntimeReady(true)
+    setRuntimeSource(source)
+    return sessionRef.current
+  }
+
+  const runBrowserPredict = async () => {
+    const { ort, session } = await ensureBrowserSession()
+    const image = await imageFromDataUrl(previewUrl)
+    const prep = preprocessImage(image)
+    const inputName = session.inputNames[0]
+    const tensor = new ort.Tensor('float32', prep.input, [1, 3, INPUT_SIZE, INPUT_SIZE])
+
+    const outputMap = await session.run({ [inputName]: tensor })
+    const outputName = session.outputNames[0]
+    const outputTensor = outputMap[outputName]
+
+    const detections = decodeYoloOutput(outputTensor, prep).map((det) => ({
+      ...det,
+      class_name: `class_${det.class_id}`,
+      bbox: [det.x1, det.y1, det.x2, det.y2],
+    }))
+
+    const annotatedImage = await drawDetections(previewUrl, detections)
+
+    return {
+      success: true,
+      count: detections.length,
+      detections,
+      annotated_image: annotatedImage,
+    }
+  }
+
+  const runBackendPredict = async () => {
+    const response = await fetch(backendUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: previewUrl }),
+    })
+
+    const data = await response.json()
+    if (!response.ok) throw new Error(data.error || 'Backend prediction failed')
+    return data
   }
 
   const runBackendPredict = async () => {
