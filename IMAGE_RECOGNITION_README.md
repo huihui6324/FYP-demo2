@@ -171,6 +171,13 @@ npm run dev
 
 3. 进入地图页面，打开图像识别面板后即可直接在网页侧推理（不再依赖 `/api/predict`）。
 
+
+### 类别名称显示（class_0 -> person）
+
+浏览器 ONNX 模式默认内置了 COCO 80 类名称映射，因此常见 YOLO 模型会显示 `person`、`car` 等真实类别名，而不是 `class_0`。
+
+如果你用的是自定义数据集，请在 `src/components/TopPanels/ImageRecognition.jsx` 里的 `DEFAULT_CLASS_NAMES` 数组替换成你自己的类别顺序。
+
 > 说明：组件会自动从 CDN 加载 `onnxruntime-web`，首次推理会稍慢。
 
 ### CDN 被拦截 / 模型 404 的处理
