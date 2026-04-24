@@ -51,28 +51,7 @@ def parse_args() -> argparse.Namespace:
         default=Path("."),
         help="Directory where exported ONNX will be placed",
     )
-    parser.add_argument(
-        "--inline-weights",
-        action="store_true",
-        help="Merge external tensor data into a single .onnx file (recommended for browser)",
-    )
     return parser.parse_args()
-
-
-def maybe_inline_external_weights(onnx_path: Path, inline_weights: bool) -> None:
-    if not inline_weights:
-        return
-
-    try:
-        import onnx
-    except ModuleNotFoundError as exc:
-        raise ModuleNotFoundError(
-            "--inline-weights requires `onnx` package. Install with: pip install onnx"
-        ) from exc
-
-    model = onnx.load_model(str(onnx_path), load_external_data=True)
-    onnx.save_model(model, str(onnx_path), save_as_external_data=False)
-
 
 
 def main() -> None:
@@ -102,8 +81,6 @@ def main() -> None:
         target_path = target_dir / output_path.name
         shutil.move(str(output_path), str(target_path))
         output_path = target_path
-
-    maybe_inline_external_weights(output_path, args.inline_weights)
 
     print("✅ Export done:", output_path)
 

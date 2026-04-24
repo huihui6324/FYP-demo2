@@ -145,10 +145,10 @@ python3 -m pip install -r src/model/requirements.txt
 
 ```bash
 cd /workspace/FYP-demo2/src/model
-python3 export_web_onnx.py --weights best.pt --imgsz 640 --opset 17 --simplify --inline-weights
+python3 export_web_onnx.py --weights best.pt --imgsz 640 --opset 17 --simplify
 ```
 
-导出后会得到 `best.onnx`（默认在当前目录）。建议加 `--inline-weights`，避免浏览器侧出现 `failed to load external data file`。
+导出后会得到 `best.onnx`（默认在当前目录）。
 
 ### 3) （可选）导出时把 NMS 融进模型
 
@@ -162,7 +162,7 @@ python3 export_web_onnx.py --weights best.pt --imgsz 640 --opset 17 --simplify -
 
 现在 `src/components/TopPanels/ImageRecognition.jsx` 已改为直接在浏览器中运行 ONNX：
 
-1. 将导出的 `best.onnx` 放到：`public/models/best.onnx`（Vite 会按 `BASE_URL` 映射，部署子路径时不要手写绝对根路径）
+1. 将导出的 `best.onnx` 放到：`public/models/best.onnx`
 2. 启动前端：
 
 ```bash
@@ -172,25 +172,3 @@ npm run dev
 3. 进入地图页面，打开图像识别面板后即可直接在网页侧推理（不再依赖 `/api/predict`）。
 
 > 说明：组件会自动从 CDN 加载 `onnxruntime-web`，首次推理会稍慢。
-
-### CDN 被拦截 / 模型 404 的处理
-
-如果浏览器控制台出现：
-- `Tracking Prevention blocked ... onnxruntime-web ...`
-- `models/best.onnx 404`
-
-可按以下方式处理：
-
-1. **ONNX Runtime 本地化（推荐）**：将 `ort.min.js` 放到 `public/vendor/ort.min.js`，前端会优先加载本地文件。
-2. **模型路径问题**：确认模型在 `public/models/best.onnx`，并使用界面默认路径（会自动带 `BASE_URL`）；或在界面里直接上传 `.onnx` 文件。
-3. **external data 报错**：若看到 `failed to load external data file`，请重新导出并加 `--inline-weights`。
-4. **快速兜底**：切换到 `Backend API` 模式，填写 `http://localhost:5000/api/predict`，走原 Flask 推理链路。
-
-### 更新代码后先做版本确认（建议）
-
-```bash
-git pull
-python src/model/export_web_onnx.py --help
-```
-
-确认帮助中包含 `--inline-weights`，再执行导出命令。
