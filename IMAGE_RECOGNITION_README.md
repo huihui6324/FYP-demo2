@@ -172,15 +172,3 @@ npm run dev
 3. 进入地图页面，打开图像识别面板后即可直接在网页侧推理（不再依赖 `/api/predict`）。
 
 > 说明：组件会自动从 CDN 加载 `onnxruntime-web`，首次推理会稍慢。
-
-### CDN 被拦截 / 模型 404 的处理
-
-如果浏览器控制台出现：
-- `Tracking Prevention blocked ... onnxruntime-web ...`
-- `models/best.onnx 404`
-
-可按以下方式处理：
-
-1. **ONNX Runtime 本地化（推荐）**：将 `ort.min.js` 放到 `public/vendor/ort.min.js`，前端会优先加载本地文件。
-2. **模型路径问题**：确认模型在 `public/models/best.onnx`，或在界面里直接上传 `.onnx` 文件。
-3. **快速兜底**：切换到 `Backend API` 模式，填写 `http://localhost:5000/api/predict`，走原 Flask 推理链路。
