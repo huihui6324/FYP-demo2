@@ -169,6 +169,8 @@ python3 export_web_onnx.py --weights best.pt --imgsz 640 --opset 17 --simplify -
 npm run dev
 ```
 
+本地开发请访问：`http://127.0.0.1:5173/#/map`（不要手动加 `/FYP-demo2/` 前缀）。
+
 3. 进入地图页面，打开图像识别面板后即可直接在网页侧推理（不再依赖 `/api/predict`）。
 
 > 默认模式已调整为 `Backend API`，避免在 CDN/本地 `ort.min.js` 异常时影响页面其它功能；需要时再切换到 `Browser ONNX`。
