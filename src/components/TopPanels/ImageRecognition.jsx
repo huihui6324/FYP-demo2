@@ -482,7 +482,7 @@ export default function ImageRecognition({ onClose }) {
   return (
     <div className="top-panel image-recognition-panel">
       <div className="panel-header">
-        <h3><span className="emoji">🔍</span> Image Recognition</h3>
+        <h3><span className="emoji">🔍</span> Image Recognition (Web ONNX)</h3>
         <button className="panel-close" onClick={onClose}>×</button>
       </div>
 
