@@ -195,6 +195,24 @@ python src/model/export_web_onnx.py --help
 
 确认帮助中包含 `--inline-weights`，再执行导出命令。
 
-> follow-up merge marker: 2026-04-24
 
-> merge-resubmit marker: 2026-04-24-b
+
+## 我执行不了命令，直接复制文件（推荐）
+
+如果你当前环境不能执行 `pip` / `python` / `npm`，可以直接复制仓库内已经准备好的文件：
+
+- 前端组件（直接覆盖原文件）：
+  - `copyable/image-recognition/ImageRecognition.jsx`
+  - `copyable/image-recognition/ImageRecognition.css`
+- ONNX 导出脚本（直接复制到模型目录执行）：
+  - `copyable/model/export_web_onnx.py`
+
+> 这些文件内容与当前可运行版本保持同步，目的是“打开即复制”，不需要你先看 diff。
+
+### 最少操作步骤
+
+1. 把 `copyable/image-recognition/ImageRecognition.jsx` 覆盖到 `src/components/TopPanels/ImageRecognition.jsx`。
+2. 把 `copyable/image-recognition/ImageRecognition.css` 覆盖到 `src/components/TopPanels/ImageRecognition.css`。
+3. 如果需要导出 ONNX，再把 `copyable/model/export_web_onnx.py` 复制到你的模型目录使用。
+
+如果你希望，我也可以下一步直接给你“单文件纯文本版”（你在聊天窗口里直接 Ctrl+C / Ctrl+V 到本地文件即可）。
