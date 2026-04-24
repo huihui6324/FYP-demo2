@@ -1,11 +1,13 @@
 import React, { useMemo, useRef, useState } from 'react'
 import './ImageRecognition.css'
 
-const MODEL_PATH = '/models/best.onnx'
+const BASE_URL = import.meta.env.BASE_URL || '/'
+const DEFAULT_MODEL_PATH = `${BASE_URL}models/best.onnx`
+const DEFAULT_BACKEND_URL = 'http://localhost:5000/api/predict'
 const INPUT_SIZE = 640
 const CONF_THRESHOLD = 0.25
 const IOU_THRESHOLD = 0.45
-
+const ORT_LOCAL = `${BASE_URL}vendor/ort.min.js`
 const ORT_CDN = 'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js'
 
 function iou(a, b) {
@@ -35,26 +37,41 @@ function nms(boxes, iouThreshold) {
   return keep
 }
 
-function ensureOrtLoaded() {
-  if (window.ort) return Promise.resolve(window.ort)
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const el = document.createElement('script')
+    el.src = src
+    el.async = true
+    el.onload = () => resolve()
+    el.onerror = () => reject(new Error(`Failed to load script: ${src}`))
+    document.head.appendChild(el)
+  })
+}
 
-  const existing = document.getElementById('ort-web-cdn')
-  if (existing) {
-    return new Promise((resolve, reject) => {
-      existing.addEventListener('load', () => resolve(window.ort), { once: true })
-      existing.addEventListener('error', () => reject(new Error('Failed to load onnxruntime-web from CDN')), { once: true })
-    })
+async function ensureOrtLoaded() {
+  if (window.ort) return { ort: window.ort, source: 'global' }
+
+  try {
+    await loadScript(ORT_LOCAL)
+    if (window.ort) return { ort: window.ort, source: 'local' }
+  } catch {
+    // ignore and fallback to CDN
   }
 
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script')
-    script.id = 'ort-web-cdn'
-    script.src = ORT_CDN
-    script.async = true
-    script.onload = () => resolve(window.ort)
-    script.onerror = () => reject(new Error('Failed to load onnxruntime-web from CDN'))
-    document.head.appendChild(script)
-  })
+  await loadScript(ORT_CDN)
+  if (!window.ort) {
+    throw new Error('onnxruntime-web 加载失败，请在 public/vendor 放置 ort.min.js 或检查网络策略')
+  }
+
+  return { ort: window.ort, source: 'cdn' }
+}
+
+
+async function assertModelReachable(modelPath) {
+  const response = await fetch(modelPath, { method: 'HEAD' })
+  if (!response.ok) {
+    throw new Error(`模型文件不可访问: ${modelPath} (HTTP ${response.status})`) 
+  }
 }
 
 function imageFromDataUrl(dataUrl) {
@@ -83,7 +100,7 @@ function preprocessImage(image, size = INPUT_SIZE) {
   ctx.drawImage(image, dx, dy, resizedW, resizedH)
 
   const { data } = ctx.getImageData(0, 0, size, size)
-  const input = new Float32Array(1 * 3 * size * size)
+  const input = new Float32Array(3 * size * size)
 
   let px = 0
   const plane = size * size
@@ -99,8 +116,6 @@ function preprocessImage(image, size = INPUT_SIZE) {
     ratio: scale,
     padX: dx,
     padY: dy,
-    modelW: size,
-    modelH: size,
     originW: image.width,
     originH: image.height,
   }
@@ -118,21 +133,16 @@ function decodeYoloOutput(outputTensor, meta) {
     const detections = []
     for (let i = 0; i < rows; i += 1) {
       const offset = i * 6
-      const x1 = data[offset]
-      const y1 = data[offset + 1]
-      const x2 = data[offset + 2]
-      const y2 = data[offset + 3]
       const confidence = data[offset + 4]
-      const classId = Math.round(data[offset + 5])
       if (confidence < CONF_THRESHOLD) continue
 
       detections.push({
-        x1: clamp((x1 - meta.padX) / meta.ratio, 0, meta.originW),
-        y1: clamp((y1 - meta.padY) / meta.ratio, 0, meta.originH),
-        x2: clamp((x2 - meta.padX) / meta.ratio, 0, meta.originW),
-        y2: clamp((y2 - meta.padY) / meta.ratio, 0, meta.originH),
+        x1: clamp((data[offset] - meta.padX) / meta.ratio, 0, meta.originW),
+        y1: clamp((data[offset + 1] - meta.padY) / meta.ratio, 0, meta.originH),
+        x2: clamp((data[offset + 2] - meta.padX) / meta.ratio, 0, meta.originW),
+        y2: clamp((data[offset + 3] - meta.padY) / meta.ratio, 0, meta.originH),
         confidence,
-        class_id: classId,
+        class_id: Math.round(data[offset + 5]),
       })
     }
     return nms(detections, IOU_THRESHOLD)
@@ -145,7 +155,6 @@ function decodeYoloOutput(outputTensor, meta) {
   if (dims.length === 3 && dims[1] > dims[2]) {
     channels = dims[1]
     candidates = dims[2]
-    channelMajor = true
   } else if (dims.length === 3) {
     channels = dims[2]
     candidates = dims[1]
@@ -181,16 +190,11 @@ function decodeYoloOutput(outputTensor, meta) {
 
     if (bestScore < CONF_THRESHOLD) continue
 
-    const x1 = cx - w / 2
-    const y1 = cy - h / 2
-    const x2 = cx + w / 2
-    const y2 = cy + h / 2
-
     detections.push({
-      x1: clamp((x1 - meta.padX) / meta.ratio, 0, meta.originW),
-      y1: clamp((y1 - meta.padY) / meta.ratio, 0, meta.originH),
-      x2: clamp((x2 - meta.padX) / meta.ratio, 0, meta.originW),
-      y2: clamp((y2 - meta.padY) / meta.ratio, 0, meta.originH),
+      x1: clamp((cx - w / 2 - meta.padX) / meta.ratio, 0, meta.originW),
+      y1: clamp((cy - h / 2 - meta.padY) / meta.ratio, 0, meta.originH),
+      x2: clamp((cx + w / 2 - meta.padX) / meta.ratio, 0, meta.originW),
+      y2: clamp((cy + h / 2 - meta.padY) / meta.ratio, 0, meta.originH),
       confidence: bestScore,
       class_id: bestClass,
     })
@@ -216,10 +220,7 @@ function drawDetections(dataUrl, detections) {
         ctx.strokeStyle = '#00E676'
         ctx.fillStyle = '#00E676'
 
-        const width = det.x2 - det.x1
-        const height = det.y2 - det.y1
-
-        ctx.strokeRect(det.x1, det.y1, width, height)
+        ctx.strokeRect(det.x1, det.y1, det.x2 - det.x1, det.y2 - det.y1)
 
         const text = `${det.class_name} ${(det.confidence * 100).toFixed(1)}%`
         const metrics = ctx.measureText(text)
@@ -246,10 +247,18 @@ export default function ImageRecognition({ onClose }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [runtimeReady, setRuntimeReady] = useState(false)
-  const fileInputRef = useRef(null)
-  const sessionRef = useRef(null)
+  const [runtimeSource, setRuntimeSource] = useState('unloaded')
+  const [mode, setMode] = useState('browser')
+  const [modelPath, setModelPath] = useState(DEFAULT_MODEL_PATH)
+  const [backendUrl, setBackendUrl] = useState(DEFAULT_BACKEND_URL)
+  const [modelFile, setModelFile] = useState(null)
 
-  const modelHint = useMemo(() => `请将模型放在 public${MODEL_PATH}`, [])
+  const fileInputRef = useRef(null)
+  const modelInputRef = useRef(null)
+  const sessionRef = useRef(null)
+  const modelUrlRef = useRef(null)
+
+  const modelHint = useMemo(() => `默认模型路径：${DEFAULT_MODEL_PATH}（也可直接上传 onnx 文件）`, [])
 
   const handleFileChange = (e) => {
     const file = e.target.files[0]
@@ -265,18 +274,76 @@ export default function ImageRecognition({ onClose }) {
     reader.readAsDataURL(file)
   }
 
-  const ensureSession = async () => {
+  const handleModelFileChange = (e) => {
+    const file = e.target.files[0]
+    setModelFile(file || null)
+    sessionRef.current = null
+    setRuntimeReady(false)
+  }
+
+  const ensureBrowserSession = async () => {
     if (sessionRef.current) return sessionRef.current
 
-    const ort = await ensureOrtLoaded()
-    ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/'
-    const session = await ort.InferenceSession.create(MODEL_PATH, {
+    const { ort, source } = await ensureOrtLoaded()
+    ort.env.wasm.wasmPaths = source === 'local' ? `${BASE_URL}vendor/` : 'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/'
+
+    let resolvedModel = modelPath
+    if (modelFile) {
+      if (modelUrlRef.current) URL.revokeObjectURL(modelUrlRef.current)
+      modelUrlRef.current = URL.createObjectURL(modelFile)
+      resolvedModel = modelUrlRef.current
+    } else {
+      await assertModelReachable(resolvedModel)
+    }
+
+    const session = await ort.InferenceSession.create(resolvedModel, {
       executionProviders: ['wasm'],
       graphOptimizationLevel: 'all',
     })
+
     sessionRef.current = { ort, session }
     setRuntimeReady(true)
+    setRuntimeSource(source)
     return sessionRef.current
+  }
+
+  const runBrowserPredict = async () => {
+    const { ort, session } = await ensureBrowserSession()
+    const image = await imageFromDataUrl(previewUrl)
+    const prep = preprocessImage(image)
+    const inputName = session.inputNames[0]
+    const tensor = new ort.Tensor('float32', prep.input, [1, 3, INPUT_SIZE, INPUT_SIZE])
+
+    const outputMap = await session.run({ [inputName]: tensor })
+    const outputName = session.outputNames[0]
+    const outputTensor = outputMap[outputName]
+
+    const detections = decodeYoloOutput(outputTensor, prep).map((det) => ({
+      ...det,
+      class_name: `class_${det.class_id}`,
+      bbox: [det.x1, det.y1, det.x2, det.y2],
+    }))
+
+    const annotatedImage = await drawDetections(previewUrl, detections)
+
+    return {
+      success: true,
+      count: detections.length,
+      detections,
+      annotated_image: annotatedImage,
+    }
+  }
+
+  const runBackendPredict = async () => {
+    const response = await fetch(backendUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: previewUrl }),
+    })
+
+    const data = await response.json()
+    if (!response.ok) throw new Error(data.error || 'Backend prediction failed')
+    return data
   }
 
   const handlePredict = async () => {
@@ -286,33 +353,12 @@ export default function ImageRecognition({ onClose }) {
     setError(null)
 
     try {
-      const { ort, session } = await ensureSession()
-      const image = await imageFromDataUrl(previewUrl)
-      const prep = preprocessImage(image)
-      const inputName = session.inputNames[0]
-      const tensor = new ort.Tensor('float32', prep.input, [1, 3, INPUT_SIZE, INPUT_SIZE])
-
-      const outputMap = await session.run({ [inputName]: tensor })
-      const outputName = session.outputNames[0]
-      const outputTensor = outputMap[outputName]
-
-      const detections = decodeYoloOutput(outputTensor, prep).map((det) => ({
-        ...det,
-        class_name: `class_${det.class_id}`,
-        bbox: [det.x1, det.y1, det.x2, det.y2],
-      }))
-
-      const annotatedImage = await drawDetections(previewUrl, detections)
-
-      setResult({
-        success: true,
-        count: detections.length,
-        detections,
-        annotated_image: annotatedImage,
-      })
+      const data = mode === 'browser' ? await runBrowserPredict() : await runBackendPredict()
+      setResult(data)
     } catch (err) {
       setError(
-        `${err.message || 'Inference failed'}。请确认 ${MODEL_PATH} 存在且是通过 export_web_onnx.py 导出的 YOLO ONNX 文件。`
+        `${err.message || 'Inference failed'}。` +
+          '若提示模型不可访问，请确认 public/models/best.onnx 并重启 npm run dev；若提示 external data file，请用导出脚本加 --inline-weights；若 CDN 被拦截，请把 ort.min.js 放到 public/vendor/。'
       )
     } finally {
       setLoading(false)
@@ -335,14 +381,65 @@ export default function ImageRecognition({ onClose }) {
       </div>
 
       <div className="panel-content">
-        <div className="runtime-hint">
-          <span className={`status-dot ${runtimeReady ? 'ready' : 'pending'}`} />
-          <span>{runtimeReady ? 'ONNX Runtime 已就绪（浏览器本地推理）' : '首次运行会自动加载 ONNX Runtime'}</span>
+        <div className="runtime-mode-row">
+          <label>
+            <input type="radio" checked={mode === 'browser'} onChange={() => setMode('browser')} /> Browser ONNX
+          </label>
+          <label>
+            <input type="radio" checked={mode === 'backend'} onChange={() => setMode('backend')} /> Backend API
+          </label>
         </div>
+
+        {mode === 'browser' && (
+          <>
+            <div className="runtime-hint">
+              <span className={`status-dot ${runtimeReady ? 'ready' : 'pending'}`} />
+              <span>
+                {runtimeReady ? `ONNX Runtime 已就绪（来源: ${runtimeSource}）` : '首次运行会加载 ONNX Runtime（优先本地 /vendor/ort.min.js）'}
+              </span>
+            </div>
+
+            <div className="upload-section compact">
+              <label>ONNX Model Path</label>
+              <input
+                type="text"
+                value={modelPath}
+                onChange={(e) => {
+                  setModelPath(e.target.value)
+                  sessionRef.current = null
+                  setRuntimeReady(false)
+                }}
+                placeholder={DEFAULT_MODEL_PATH}
+                disabled={loading || !!modelFile}
+              />
+              <p className="help-text">{modelHint}</p>
+              <p className="help-text">当前请求 URL: <code>{modelPath}</code></p>
+              <input
+                ref={modelInputRef}
+                type="file"
+                accept=".onnx"
+                onChange={handleModelFileChange}
+                disabled={loading}
+              />
+            </div>
+          </>
+        )}
+
+        {mode === 'backend' && (
+          <div className="upload-section compact">
+            <label>Backend API URL</label>
+            <input
+              type="text"
+              value={backendUrl}
+              onChange={(e) => setBackendUrl(e.target.value)}
+              placeholder="http://localhost:5000/api/predict"
+              disabled={loading}
+            />
+          </div>
+        )}
 
         <div className="upload-section">
           <label>Upload Image for Recognition</label>
-          <p className="help-text">{modelHint}</p>
           <div className="file-input-wrapper">
             <input
               ref={fileInputRef}
@@ -362,10 +459,7 @@ export default function ImageRecognition({ onClose }) {
 
             <div className="action-buttons">
               <button className="btn btn-primary" onClick={handlePredict} disabled={loading}>
-                {loading ? 'Analyzing...' : 'Run Recognition (ONNX in Browser)'}
-              </button>
-              <button className="btn btn-secondary" onClick={handleClear} disabled={loading}>
-                Clear
+                {loading ? 'Analyzing...' : mode === 'browser' ? 'Run Browser ONNX' : 'Run Backend API'}
               </button>
               <button className="btn btn-secondary" onClick={handleClear} disabled={loading}>Clear</button>
             </div>
@@ -375,15 +469,11 @@ export default function ImageRecognition({ onClose }) {
         {loading && (
           <div className="loading-state">
             <div className="spinner" />
-            <p>Running ONNX inference in browser...</p>
+            <p>{mode === 'browser' ? 'Running ONNX in browser...' : 'Calling backend API...'}</p>
           </div>
         )}
 
-        {error && (
-          <div className="error-state">
-            <p className="error-message">⚠️ {error}</p>
-          </div>
-        )}
+        {error && <div className="error-state"><p className="error-message">⚠️ {error}</p></div>}
 
         {result && (
           <div className="results-section">
@@ -412,14 +502,6 @@ export default function ImageRecognition({ onClose }) {
                 </ul>
               </div>
             )}
-
-            {result.detections && result.detections.length === 0 && <p className="empty-state">No objects detected</p>}
-          </div>
-        )}
-
-        {!previewUrl && !loading && !result && (
-          <div className="empty-state">
-            <p>Upload an image to start recognition</p>
           </div>
         )}
       </div>
