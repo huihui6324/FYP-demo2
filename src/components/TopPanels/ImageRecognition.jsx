@@ -352,6 +352,55 @@ export default function ImageRecognition({ onClose }) {
       detections,
       annotated_image: annotatedImage,
     }
+
+    const session = await ort.InferenceSession.create(resolvedModel, {
+      executionProviders: ['wasm'],
+      graphOptimizationLevel: 'all',
+    })
+
+    sessionRef.current = { ort, session }
+    setRuntimeReady(true)
+    setRuntimeSource(source)
+    return sessionRef.current
+  }
+
+  const runBrowserPredict = async () => {
+    const { ort, session } = await ensureBrowserSession()
+    const image = await imageFromDataUrl(previewUrl)
+    const prep = preprocessImage(image)
+    const inputName = session.inputNames[0]
+    const tensor = new ort.Tensor('float32', prep.input, [1, 3, INPUT_SIZE, INPUT_SIZE])
+
+    const outputMap = await session.run({ [inputName]: tensor })
+    const outputName = session.outputNames[0]
+    const outputTensor = outputMap[outputName]
+
+    const detections = decodeYoloOutput(outputTensor, prep).map((det) => ({
+      ...det,
+      class_name: `class_${det.class_id}`,
+      bbox: [det.x1, det.y1, det.x2, det.y2],
+    }))
+
+    const annotatedImage = await drawDetections(previewUrl, detections)
+
+    return {
+      success: true,
+      count: detections.length,
+      detections,
+      annotated_image: annotatedImage,
+    }
+  }
+
+  const runBackendPredict = async () => {
+    const response = await fetch(backendUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: previewUrl }),
+    })
+
+    const data = await response.json()
+    if (!response.ok) throw new Error(data.error || 'Backend prediction failed')
+    return data
   }
 
   const runBackendPredict = async () => {
@@ -396,7 +445,7 @@ export default function ImageRecognition({ onClose }) {
   return (
     <div className="top-panel image-recognition-panel">
       <div className="panel-header">
-        <h3><span className="emoji">🔍</span> Image Recognition</h3>
+        <h3><span className="emoji">🔍</span> Image Recognition (Web ONNX)</h3>
         <button className="panel-close" onClick={onClose}>×</button>
       </div>
 
