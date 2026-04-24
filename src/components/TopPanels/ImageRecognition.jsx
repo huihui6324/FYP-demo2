@@ -362,12 +362,12 @@ export default function ImageRecognition({ onClose }) {
       await assertModelReachable(resolvedModel)
     }
 
-    const ortSession = await ort.InferenceSession.create(resolvedModel, {
+    const createdSession = await ort.InferenceSession.create(resolvedModel, {
       executionProviders: ['wasm'],
       graphOptimizationLevel: 'all',
     })
 
-    sessionRef.current = { ort, session: ortSession }
+    sessionRef.current = { ort, session: createdSession }
     setRuntimeReady(true)
     setRuntimeSource(source)
     return sessionRef.current
@@ -376,13 +376,13 @@ export default function ImageRecognition({ onClose }) {
   const runBrowserPredict = async () => {
     const browserRuntime = await ensureBrowserSession()
     const ort = browserRuntime.ort
-    const ortSession = browserRuntime.session
+    const session = browserRuntime.session
     const image = await imageFromDataUrl(previewUrl)
     const prep = preprocessImage(image)
-    const inputName = ortSession.inputNames[0]
+    const inputName = session.inputNames[0]
     const tensor = new ort.Tensor('float32', prep.input, [1, 3, INPUT_SIZE, INPUT_SIZE])
 
-    const outputMap = await ortSession.run({ [inputName]: tensor })
+    const outputMap = await session.run({ [inputName]: tensor })
 
     // Some exports provide multiple outputs (e.g. boxes/scores separated).
     // Prefer a tensor that looks like YOLO logits: [1, C, N] or [1, N, C] with C >= 5.
@@ -395,7 +395,7 @@ export default function ImageRecognition({ onClose }) {
       return looksLikeChannelsFirst || looksLikeChannelsLast
     })
 
-    const outputTensor = preferredTensor || outputMap[ortSession.outputNames[0]]
+    const outputTensor = preferredTensor || outputMap[session.outputNames[0]]
 
     const detections = decodeYoloOutput(outputTensor, prep).map((det) => ({
       ...det,
@@ -411,68 +411,6 @@ export default function ImageRecognition({ onClose }) {
       detections,
       annotated_image: annotatedImage,
     }
-
-    const ortSession = await ort.InferenceSession.create(resolvedModel, {
-      executionProviders: ['wasm'],
-      graphOptimizationLevel: 'all',
-    })
-
-    sessionRef.current = { ort, session: ortSession }
-    setRuntimeReady(true)
-    setRuntimeSource(source)
-    return sessionRef.current
-  }
-
-  const runBrowserPredict = async () => {
-    const browserRuntime = await ensureBrowserSession()
-    const ort = browserRuntime.ort
-    const ortSession = browserRuntime.session
-    const image = await imageFromDataUrl(previewUrl)
-    const prep = preprocessImage(image)
-    const inputName = ortSession.inputNames[0]
-    const tensor = new ort.Tensor('float32', prep.input, [1, 3, INPUT_SIZE, INPUT_SIZE])
-
-    const outputMap = await ortSession.run({ [inputName]: tensor })
-
-    // Some exports provide multiple outputs (e.g. boxes/scores separated).
-    // Prefer a tensor that looks like YOLO logits: [1, C, N] or [1, N, C] with C >= 5.
-    const outputTensors = Object.values(outputMap)
-    const preferredTensor = outputTensors.find((t) => {
-      const d = t.dims || []
-      if (d.length !== 3) return false
-      const looksLikeChannelsFirst = d[1] <= 256 && d[1] >= 5
-      const looksLikeChannelsLast = d[2] <= 256 && d[2] >= 5
-      return looksLikeChannelsFirst || looksLikeChannelsLast
-    })
-
-    const outputTensor = preferredTensor || outputMap[ortSession.outputNames[0]]
-
-    const detections = decodeYoloOutput(outputTensor, prep).map((det) => ({
-      ...det,
-      class_name: resolveClassName(det.class_id),
-      bbox: [det.x1, det.y1, det.x2, det.y2],
-    }))
-
-    const annotatedImage = await drawDetections(previewUrl, detections)
-
-    return {
-      success: true,
-      count: detections.length,
-      detections,
-      annotated_image: annotatedImage,
-    }
-  }
-
-  const runBackendPredict = async () => {
-    const response = await fetch(backendUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: previewUrl }),
-    })
-
-    const data = await response.json()
-    if (!response.ok) throw new Error(data.error || 'Backend prediction failed')
-    return data
   }
 
   const runBackendPredict = async () => {

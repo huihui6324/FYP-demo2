@@ -362,12 +362,12 @@ export default function ImageRecognition({ onClose }) {
       await assertModelReachable(resolvedModel)
     }
 
-    const ortSession = await ort.InferenceSession.create(resolvedModel, {
+    const createdSession = await ort.InferenceSession.create(resolvedModel, {
       executionProviders: ['wasm'],
       graphOptimizationLevel: 'all',
     })
 
-    sessionRef.current = { ort, session: ortSession }
+    sessionRef.current = { ort, session: createdSession }
     setRuntimeReady(true)
     setRuntimeSource(source)
     return sessionRef.current
@@ -376,13 +376,13 @@ export default function ImageRecognition({ onClose }) {
   const runBrowserPredict = async () => {
     const browserRuntime = await ensureBrowserSession()
     const ort = browserRuntime.ort
-    const ortSession = browserRuntime.session
+    const session = browserRuntime.session
     const image = await imageFromDataUrl(previewUrl)
     const prep = preprocessImage(image)
-    const inputName = ortSession.inputNames[0]
+    const inputName = session.inputNames[0]
     const tensor = new ort.Tensor('float32', prep.input, [1, 3, INPUT_SIZE, INPUT_SIZE])
 
-    const outputMap = await ortSession.run({ [inputName]: tensor })
+    const outputMap = await session.run({ [inputName]: tensor })
 
     // Some exports provide multiple outputs (e.g. boxes/scores separated).
     // Prefer a tensor that looks like YOLO logits: [1, C, N] or [1, N, C] with C >= 5.
@@ -395,7 +395,7 @@ export default function ImageRecognition({ onClose }) {
       return looksLikeChannelsFirst || looksLikeChannelsLast
     })
 
-    const outputTensor = preferredTensor || outputMap[ortSession.outputNames[0]]
+    const outputTensor = preferredTensor || outputMap[session.outputNames[0]]
 
     const detections = decodeYoloOutput(outputTensor, prep).map((det) => ({
       ...det,
