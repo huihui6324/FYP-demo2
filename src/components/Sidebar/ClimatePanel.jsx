@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import * as Cesium from 'cesium'
 import '../Sidebar.css'
 
 export default function ClimatePanel({ climate, setClimate, viewer, isExpanded, onToggle }) {
-  const rainEffectRef = useRef(null)
-  const snowEffectRef = useRef(null)
+  const rainStageRef = useRef(null)
+  const snowStageRef = useRef(null)
 
   // 处理雾效
   useEffect(() => {
@@ -20,105 +20,99 @@ export default function ClimatePanel({ climate, setClimate, viewer, isExpanded, 
     }
   }, [viewer, climate.fog])
 
-  // 处理雨雪粒子效果
+  // 处理雨雪屏幕后处理效果（确保在任意相机高度都可见）
   useEffect(() => {
     if (!viewer) return
 
-    // 清理旧的粒子系统
-    if (rainEffectRef.current) {
-      viewer.scene.primitives.remove(rainEffectRef.current)
-      rainEffectRef.current = null
-    }
-    if (snowEffectRef.current) {
-      viewer.scene.primitives.remove(snowEffectRef.current)
-      snowEffectRef.current = null
-    }
-
     const scene = viewer.scene
+    const { postProcessStages } = scene
 
-    // 辅助函数：创建粒子系统
-    const createParticleSystem = (type) => {
-      const isRain = type === 'rain'
-      
-      // 使用相机当前位置作为发射中心
-      const cameraPosition = viewer.camera.positionCartographic
-      const emissionOrigin = Cesium.Cartesian3.fromRadians(
-        cameraPosition.longitude,
-        cameraPosition.latitude,
-        cameraPosition.height + 1000
-      )
-
-      console.log(`Creating ${type} effect at height:`, cameraPosition.height)
-
-      return scene.primitives.add(new Cesium.ParticleSystem({
-        image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
-        
-        startColor: isRain
-          ? new Cesium.Color(0.3, 0.3, 1.0, 1.0)
-          : new Cesium.Color(1.0, 1.0, 1.0, 1.0),
-        
-        endColor: isRain
-          ? new Cesium.Color(0.3, 0.3, 1.0, 0.8)
-          : new Cesium.Color(1.0, 1.0, 1.0, 0.8),
-        
-        startScale: isRain ? 1.0 : 3.0,
-        endScale: isRain ? 1.5 : 5.0,
-        
-        minimumParticleLife: 2.0,
-        maximumParticleLife: 4.0,
-        
-        minimumSpeed: isRain ? 100 : 10,
-        maximumSpeed: isRain ? 150 : 25,
-        
-        imageSize: new Cesium.Cartesian2(isRain ? 3 : 8, isRain ? 15 : 8),
-        
-        emissionRate: isRain ? 8000 : 5000,
-        
-        lifetime: 16.0,
-        
-        emitter: new Cesium.SphereEmitter(isRain ? 300 : 500),
-        
-        emitterModelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(emissionOrigin),
-        
-        modelMatrix: Cesium.Matrix4.IDENTITY,
-        
-        force: new Cesium.Cartesian3(0, 0, isRain ? -9.8 * 10 : -0.5),
-        
-        sizeInMeters: true,
-        
-        depthFade: false
-      }))
+    if (rainStageRef.current) {
+      postProcessStages.remove(rainStageRef.current)
+      rainStageRef.current = null
+    }
+    if (snowStageRef.current) {
+      postProcessStages.remove(snowStageRef.current)
+      snowStageRef.current = null
     }
 
-    console.log("ClimatePanel: Updating effects", { rain: climate.rain, snow: climate.snow })
+    const createRainStage = () => postProcessStages.add(new Cesium.PostProcessStage({
+      name: 'weather-rain-stage',
+      fragmentShader: `
+        uniform sampler2D colorTexture;
+        in vec2 v_textureCoordinates;
+        float hash(float x){ return fract(sin(x * 133.3) * 13.13); }
+        void main(void){
+          float time = czm_frameNumber / 60.0;
+          vec2 resolution = czm_viewport.zw;
+          vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
+          vec3 c = vec3(.6,.7,.8);
+          float a = -0.35;
+          float si = sin(a), co = cos(a);
+          uv *= mat2(co, -si, si, co);
+          uv *= length(uv + vec2(0, 4.9)) * .25 + 1.0;
+          float v = 1.0 - sin(hash(floor(uv.x * 80.0)) * 2.0);
+          float b = clamp(abs(sin(20.0 * time * v + uv.y * 5.0)) - .95, 0.0, 1.0) * 20.0;
+          c *= v * b * 0.55;
+          vec4 base = texture(colorTexture, v_textureCoordinates);
+          out_FragColor = vec4(base.rgb + c, base.a);
+        }
+      `
+    }))
+
+    const createSnowStage = () => postProcessStages.add(new Cesium.PostProcessStage({
+      name: 'weather-snow-stage',
+      fragmentShader: `
+        uniform sampler2D colorTexture;
+        in vec2 v_textureCoordinates;
+        float snow(vec2 uv, float scale){
+          float time = czm_frameNumber / 60.0;
+          float w = smoothstep(1.0, 0.0, -uv.y * (scale / 10.0));
+          if (w < 0.1) return 0.0;
+          uv += time / scale;
+          uv.y += time * 2.0 / scale;
+          uv.x += sin(uv.y + time * 0.5) / scale;
+          uv *= scale;
+          vec2 s = floor(uv), f = fract(uv), p;
+          float k = 3.0, d;
+          p = .5 + .35 * sin(11.0 * fract(sin((s + scale) * mat2(7,3,6,5)) * 5.0)) - f;
+          d = length(p);
+          k = min(d, k);
+          k = smoothstep(0.0, k, sin(f.x + f.y) * 0.01);
+          return k * w;
+        }
+        void main(void){
+          vec2 resolution = czm_viewport.zw;
+          vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
+          float c = 0.0;
+          c += snow(uv, 30.0) * 0.0;
+          c += snow(uv, 20.0) * 0.0;
+          c += snow(uv, 15.0) * 0.0;
+          c += snow(uv, 10.0);
+          c += snow(uv, 8.0);
+          c += snow(uv, 6.0);
+          vec3 snowColor = vec3(c) * 0.6;
+          vec4 base = texture(colorTexture, v_textureCoordinates);
+          out_FragColor = vec4(base.rgb + snowColor, base.a);
+        }
+      `
+    }))
 
     if (climate.rain) {
-      try {
-        rainEffectRef.current = createParticleSystem('rain')
-        console.log("Rain effect created successfully")
-      } catch (e) {
-        console.error("Failed to create rain effect:", e)
-      }
+      rainStageRef.current = createRainStage()
     }
-
     if (climate.snow) {
-      try {
-        snowEffectRef.current = createParticleSystem('snow')
-        console.log("Snow effect created successfully")
-      } catch (e) {
-        console.error("Failed to create snow effect:", e)
-      }
+      snowStageRef.current = createSnowStage()
     }
 
-    // 清理函数
     return () => {
-      if (rainEffectRef.current) {
-        viewer.scene.primitives.remove(rainEffectRef.current)
-        rainEffectRef.current = null
+      if (rainStageRef.current) {
+        postProcessStages.remove(rainStageRef.current)
+        rainStageRef.current = null
       }
-      if (snowEffectRef.current) {
-        viewer.scene.primitives.remove(snowEffectRef.current)
-        snowEffectRef.current = null
+      if (snowStageRef.current) {
+        postProcessStages.remove(snowStageRef.current)
+        snowStageRef.current = null
       }
     }
   }, [viewer, climate.rain, climate.snow])
