@@ -10,8 +10,8 @@
     "deploy": "gh-pages -d dist",
     "lint": "eslint .",
     "preview": "vite preview",
-    "doctor:esbuild": "npm rebuild esbuild && node -e \"console.log('esbuild', require('esbuild').version)\"",
-    "reset:deps": "node -e \"const fs=require('fs');fs.rmSync('node_modules',{recursive:true,force:true});\" && npm ci",
+    "doctor:esbuild": "node scripts/doctor-esbuild.cjs",
+    "reset:deps": "node -e \"const fs=require('fs');fs.rmSync('node_modules',{recursive:true,force:true});\" && npm install",
     "predev": "npm run doctor:esbuild"
   },
   "dependencies": {
