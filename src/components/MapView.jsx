@@ -7,30 +7,6 @@ import 'cesium/Build/Cesium/Widgets/widgets.css'
 // 配置 Cesium Ion Access Token
 Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5ODYzMGVjNy1hOGZmLTQzNTMtOGNiNC0wNmMzMzU3YjJmYzEiLCJpZCI6NDEzOTgzLCJpYXQiOjE3NzUzNzIwMDN9.alkn5QrNOGKTVFb4sx9jufiPe8LiOZQ3ruN0sihnJSU';
 
-// 创建雨滴图片（Base64）
-const createRaindropImage = () => {
-  const canvas = document.createElement('canvas');
-  canvas.width = 8;
-  canvas.height = 15;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = 'rgba(100, 150, 255, 0.8)';
-  ctx.fillRect(2, 0, 4, 15);
-  return canvas.toDataURL();
-};
-
-// 创建雪花图片（Base64）
-const createSnowflakeImage = () => {
-  const canvas = document.createElement('canvas');
-  canvas.width = 10;
-  canvas.height = 10;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-  ctx.beginPath();
-  ctx.arc(5, 5, 4, 0, Math.PI * 2);
-  ctx.fill();
-  return canvas.toDataURL();
-};
-
 // 引入所有 CSS 文件
 import './MapView.css'
 import './Toolbar.css'
@@ -47,17 +23,6 @@ import { ClimatePanel, TimePanel, WeatherPanel, PresentationPanel, SplitScreenPa
 function MapView() {
   const cesiumContainer = useRef(null)
   const [viewer, setViewer] = useState(null)
-  
-  // 缓存粒子图像生成函数
-  const raindropImageRef = useRef(null);
-  const snowflakeImageRef = useRef(null);
-  
-  if (!raindropImageRef.current) {
-    raindropImageRef.current = createRaindropImage();
-  }
-  if (!snowflakeImageRef.current) {
-    snowflakeImageRef.current = createSnowflakeImage();
-  }
   
   // 左侧面板展开状态
   const [leftPanels, setLeftPanels] = useState({
@@ -143,85 +108,6 @@ function MapView() {
     date.setUTCMonth(climate.month);
     viewer.clock.currentTime = Cesium.JulianDate.fromDate(date);
     viewer.clock.shouldAnimate = false;
-
-    // 雨效果 - 使用粒子系统
-    if (climate.rain) {
-      if (!scene.rainSystem) {
-        // 获取相机位置作为发射器中心
-        const cameraPos = viewer.camera.positionCartographic;
-        const center = Cesium.Cartesian3.fromRadians(
-          cameraPos.longitude,
-          cameraPos.latitude,
-          200 // 高于地面 200 米
-        );
-        
-        // 创建雨滴粒子系统
-        scene.rainSystem = scene.primitives.add(new Cesium.ParticleSystem({
-          image: raindropImageRef.current,
-          startColor: new Cesium.Color(0.5, 0.6, 0.8, 0.8),
-          endColor: new Cesium.Color(0.5, 0.6, 0.8, 0.1),
-          startScale: 1.0,
-          endScale: 0.5,
-          minimumParticleLife: 0.4,
-          maximumParticleLife: 0.7,
-          minimumSpeed: 20.0,
-          maximumSpeed: 30.0,
-          imageSize: new Cesium.Cartesian2(8, 15),
-          emissionRate: 5000,
-          lifetime: 16.0,
-          systemLife: 16.0,
-          emitter: new Cesium.BoxEmitter(new Cesium.Cartesian3(1000, 1000, 200)),
-          modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(center),
-          force: new Cesium.Cartesian3(0, 0, -9.81 * 3),
-          sizeInMeters: true
-        }));
-      }
-    } else {
-      if (scene.rainSystem) {
-        scene.primitives.remove(scene.rainSystem);
-        scene.rainSystem = null;
-      }
-    }
-
-    // 雪效果 - 使用粒子系统
-    if (climate.snow) {
-      if (!scene.snowSystem) {
-        const cameraPos = viewer.camera.positionCartographic;
-        const center = Cesium.Cartesian3.fromRadians(
-          cameraPos.longitude,
-          cameraPos.latitude,
-          200
-        );
-        
-        // 创建雪花粒子系统
-        scene.snowSystem = scene.primitives.add(new Cesium.ParticleSystem({
-          image: snowflakeImageRef.current,
-          startColor: new Cesium.Color(1.0, 1.0, 1.0, 0.95),
-          endColor: new Cesium.Color(1.0, 1.0, 1.0, 0.4),
-          startScale: 2.5,
-          endScale: 1.5,
-          minimumParticleLife: 3.0,
-          maximumParticleLife: 5.0,
-          minimumSpeed: 1.0,
-          maximumSpeed: 3.0,
-          imageSize: new Cesium.Cartesian2(10, 10),
-          emissionRate: 3000,
-          lifetime: 16.0,
-          systemLife: 16.0,
-          emitter: new Cesium.BoxEmitter(new Cesium.Cartesian3(1000, 1000, 200)),
-          modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(center),
-          force: new Cesium.Cartesian3(0, 0, -9.81 * 0.2),
-          sizeInMeters: true,
-          // 添加侧向力模拟风的效果
-          wind: new Cesium.Cartesian3(0.5, 0.5, 0)
-        }));
-      }
-    } else {
-      if (scene.snowSystem) {
-        scene.primitives.remove(scene.snowSystem);
-        scene.snowSystem = null;
-      }
-    }
 
   }, [viewer, climate])
   
