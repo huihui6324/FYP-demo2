@@ -83,32 +83,31 @@ function MapView() {
   useEffect(() => {
     if (!viewer) return
 
-    const scene = viewer.scene;
+    const scene = viewer.scene
 
-    // 雾效果 - 增强可见度
-    const fogDensity = climate.fog > 0 ? climate.fog / 2000 : 0;
-    scene.fog.enabled = climate.fog > 0;
-    scene.fog.density = fogDensity;
-    scene.fog.screenSpaceErrorFactor = climate.fog > 0 ? 5 : 1;
-    
-    // 根据雾浓度调整颜色
-    if (climate.fog > 50) {
-      scene.fog.color = new Cesium.Color(0.6, 0.6, 0.7, 1.0);
-    } else {
-      scene.fog.color = new Cesium.Color(0.0, 0.0, 0.0, 1.0);
-    }
+    // 阴影效果：不再是空壳，真正启用 shadow map 与地形光照
+    viewer.shadows = climate.castShadows
+    scene.shadowMap.enabled = climate.castShadows
+    scene.globe.enableLighting = true
+    scene.globe.shadows = climate.castShadows ? Cesium.ShadowMode.ENABLED : Cesium.ShadowMode.RECEIVE_ONLY
 
-    // 阴影 - 根据开关和光照启用状态
-    viewer.shadows = climate.castShadows;
-    scene.globe.enableLighting = climate.castShadows;
-    
-    // 根据时间更新太阳位置
-    const date = new Date();
-    date.setUTCHours(climate.hour - parseInt(climate.timezone), 45, 0, 0);
-    date.setUTCMonth(climate.month);
-    viewer.clock.currentTime = Cesium.JulianDate.fromDate(date);
-    viewer.clock.shouldAnimate = false;
+    // 根据时间 + 时区更新太阳位置（使用 UTC 基准，确保时区切换有实际效果）
+    const timezoneOffset = parseInt(climate.timezone, 10)
+    const utcHour = climate.hour - timezoneOffset
+    const solarDate = new Date(Date.UTC(2026, climate.month, 21, utcHour, 45, 0, 0))
 
+    viewer.clock.currentTime = Cesium.JulianDate.fromDate(solarDate)
+    viewer.clock.shouldAnimate = false
+    viewer.clock.multiplier = 0
+
+    // 用日照开关影响地球亮度，避免时间面板看起来“没反应”
+    const sunHeight = Math.max(0, Math.sin((climate.hour / 24) * Math.PI * 2 - Math.PI / 2))
+    scene.light = new Cesium.SunLight({
+      color: Cesium.Color.WHITE,
+      intensity: climate.castShadows ? 1.1 + sunHeight * 0.8 : 0.7 + sunHeight * 0.5
+    })
+
+    scene.requestRender()
   }, [viewer, climate])
   
   // 初始化 Cesium
