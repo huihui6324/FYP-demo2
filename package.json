@@ -9,7 +9,10 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "doctor:esbuild": "node scripts/doctor-esbuild.cjs",
+    "reset:deps": "node -e \"const fs=require('fs');fs.rmSync('node_modules',{recursive:true,force:true});\" && npm install",
+    "predev": "npm run doctor:esbuild"
   },
   "dependencies": {
     "cesium": "^1.138.0",
