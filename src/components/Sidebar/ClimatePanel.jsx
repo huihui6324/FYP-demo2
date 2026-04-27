@@ -5,18 +5,62 @@ import '../Sidebar.css'
 export default function ClimatePanel({ climate, setClimate, viewer, isExpanded, onToggle }) {
   const rainStageRef = useRef(null)
   const snowStageRef = useRef(null)
+  const fogStageRef = useRef(null)
 
-  // 处理雾效
+  // 处理雾效：Cesium 原生雾 + 屏幕后处理雾，让滑条变化更明显
   useEffect(() => {
     if (!viewer) return
-    
+
     const scene = viewer.scene
-    if (climate.fog > 0) {
-      scene.fog.enabled = true
-      scene.fog.density = climate.fog / 2000
-      scene.fog.screenSpaceErrorFactor = 2.0
-    } else {
-      scene.fog.enabled = false
+    const { postProcessStages } = scene
+
+    if (!fogStageRef.current) {
+      fogStageRef.current = postProcessStages.add(
+        new Cesium.PostProcessStage({
+          name: 'weather-fog-overlay-stage',
+          fragmentShader: `
+            uniform sampler2D colorTexture;
+            uniform sampler2D depthTexture;
+            in vec2 v_textureCoordinates;
+            uniform float fogIntensity;
+            uniform vec3 fogTint;
+
+            void main(void) {
+              vec4 base = texture(colorTexture, v_textureCoordinates);
+              float depth = czm_readDepth(depthTexture, v_textureCoordinates);
+
+              // 将深度映射到更平滑的雾权重（近处轻，远处重）
+              float depthFactor = smoothstep(0.72, 1.0, depth);
+              float amount = clamp(fogIntensity * (0.25 + depthFactor), 0.0, 0.9);
+
+              vec3 mixed = mix(base.rgb, fogTint, amount);
+              out_FragColor = vec4(mixed, base.a);
+            }
+          `,
+          uniforms: {
+            fogIntensity: () => climate.fog / 100,
+            fogTint: () => {
+              const base = 0.72 + climate.fog / 500
+              const channel = Math.min(base, 0.92)
+              return new Cesium.Cartesian3(channel, channel, channel + 0.02)
+            }
+          }
+        })
+      )
+    }
+
+    const fogRatio = climate.fog / 100
+    scene.fog.enabled = climate.fog > 0
+    scene.fog.density = fogRatio * fogRatio * 0.035
+    scene.fog.minimumBrightness = 0.2
+    scene.fog.screenSpaceErrorFactor = 2.0 + fogRatio * 5
+    fogStageRef.current.enabled = climate.fog > 0
+
+    return () => {
+      if (fogStageRef.current) {
+        postProcessStages.remove(fogStageRef.current)
+        fogStageRef.current = null
+      }
     }
   }, [viewer, climate.fog])
 
